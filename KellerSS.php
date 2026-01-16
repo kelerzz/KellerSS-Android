@@ -152,11 +152,35 @@ function simularScan($nomeJogo) {
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
-    // 3. Reinício e Logs
+    // 3. REINÍCIO (AGORA REAL VIA ADB)
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
-    usleep(100000);
-    echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
+    
+    $uptime = shell_exec("adb shell uptime");
+    usleep(100000); // Simulação de processamento da resposta
 
+    $reiniciadoRecente = false;
+    $msgTempo = "";
+
+    if ($uptime) {
+        // Verifica se a saída contém "min" (indicando que reiniciou há menos de 1 hora)
+        // Saída comum: " 10:00:00 up 15 min, ..."
+        if (preg_match('/up\s+(\d+)\s+min/', $uptime, $m)) {
+            $minutos = intval($m[1]);
+            if ($minutos < 60) {
+                $reiniciadoRecente = true;
+                $msgTempo = "$minutos minutos";
+            }
+        } 
+        // Se não tiver "min", provavelmente tem "day" ou formato de hora "1:30" (seguro)
+    }
+
+    if ($reiniciadoRecente) {
+        echo $bold . $vermelho . "[!] O dispositivo foi iniciado recentemente (há $msgTempo).\n\n";
+    } else {
+        echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
+    }
+
+    // Logs e Data
     $logDate = date("d-m H:i:s", strtotime("-3 hours"));
     echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
     echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
@@ -181,7 +205,7 @@ function simularScan($nomeJogo) {
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    // --- LÓGICA DE DATAS ---
+    // --- LÓGICA DE DATAS (Mantida) ---
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
