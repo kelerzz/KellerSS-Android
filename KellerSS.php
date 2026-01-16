@@ -93,7 +93,7 @@ function conectarADBReal() {
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner (Timing Ajustado) ---
+// --- Lógica FAKE do Scanner (Timing 100ms -> 30ms) ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
 
@@ -116,33 +116,33 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST (TIMING HÍBRIDO: LENTO -> RÁPIDO)
+    // 2. BYPASS LIST (TIMING EXATO SOLICITADO)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
     $checks = [
-        "Verificando funções maliciosas no ambiente shell...",    // 0
-        "Testando acesso a diretórios críticos...",             // 1
-        "Verificando processos suspeitos...",                   // 2
-        "Verificando arquivos de configuração...",              // 3
-        "Testando comportamento real das funções...",           // 4
-        "Testando manipulação da função stat...",               // 5 (Último lento)
-        "Testando comportamento do comando cd...",              // 6 (Começa rápido)
-        "Testando integridade de comandos básicos...",          // 7
-        "Testando bloqueio de comandos pkg...",                 // 8
-        "Verificando arquivos de bypass no dispositivo..."      // 9
+        "Verificando funções maliciosas no ambiente shell...",    // 0 (Lento)
+        "Testando acesso a diretórios críticos...",             // 1 (Lento)
+        "Verificando processos suspeitos...",                   // 2 (Lento)
+        "Verificando arquivos de configuração...",              // 3 (Lento)
+        "Testando comportamento real das funções...",           // 4 (Lento)
+        "Testando manipulação da função stat...",               // 5 (Último Lento)
+        "Testando comportamento do comando cd...",              // 6 (Rápido)
+        "Testando integridade de comandos básicos...",          // 7 (Rápido)
+        "Testando bloqueio de comandos pkg...",                 // 8 (Rápido)
+        "Verificando arquivos de bypass no dispositivo..."      // 9 (Rápido)
     ];
 
     foreach ($checks as $index => $check) {
         echo $bold . $azul . "[+] $check\n";
         
-        // Lógica de tempo híbrida
+        // Fase Lenta (Até o stat incluso)
         if ($index <= 5) {
-            // Fase Lenta (~15ms com pequena variação orgânica)
-            usleep(rand(12000, 18000)); 
-        } else {
-            // Fase Rápida (~5ms com pequena variação orgânica)
-            usleep(rand(3000, 7000));
+            usleep(100000); // 100ms
+        } 
+        // Fase Rápida (Do cd em diante)
+        else {
+            usleep(30000);  // 30ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
