@@ -95,7 +95,10 @@ function conectarADBReal() {
 
 // --- Lógica FAKE do Scanner (Timings Precisos) ---
 function simularScan($nomeJogo) {
-    global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
+    global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
+
+    // Define o pacote com base no jogo escolhido (ESSENCIAL PARA O CÓDIGO NOVO)
+    $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
 
     system("clear");
     keller_banner();
@@ -116,7 +119,7 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST (TIMING HÍBRIDO)
+    // 2. BYPASS LIST
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
@@ -135,54 +138,36 @@ function simularScan($nomeJogo) {
 
     foreach ($checks as $index => $check) {
         echo $bold . $azul . "[+] $check\n";
-        
-        // Fase Lenta (Até o stat incluso)
         if ($index <= 5) {
-            usleep(400000); // 400ms
-            
-            // Pausa EXTRA de transição após o stat (index 5)
-            if ($index == 5) {
-                usleep(500000); // 500ms de atraso
-            }
-        } 
-        // Fase Rápida (Do cd em diante)
-        else {
-            usleep(70000);  // 70ms
+            usleep(400000);
+            if ($index == 5) usleep(500000);
+        } else {
+            usleep(70000);
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
-    // 3. REINÍCIO (REAL mas SEMPRE VERDE)
+    // 3. REINÍCIO
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
-    
-    // Executa o comando REAL para gerar delay/processamento real no sistema
     $uptime = shell_exec("adb shell uptime"); 
     usleep(100000); 
-
-    // IGNORA o resultado real e mostra sempre verde (Fake)
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
     // --- IMPLEMENTAÇÃO LOGCAT REAL (DATA SISTEMA) ---
-    // Tenta pegar a data real do log do sistema
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
     if (!empty($matchTime[1])) {
-        // Converte para objeto de data para garantir formatação correta
         $dateObj = DateTime::createFromFormat('m-d H:i:s', $matchTime[1]);
         $formattedDate = $dateObj ? $dateObj->format('d-m H:i:s') : $matchTime[1];
-
         echo $bold . $amarelo . "[+] Primeira log do sistema: " . $formattedDate . "\n";
         echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
     } else {
-        // Caso não tenha ADB conectado ou log vazio
         echo $bold . $vermelho . "[!] Não foi possível capturar a data/hora do sistema (Verifique conexão ADB).\n";
         echo $bold . $branco . "[+] W.O aplicável se a falha persistir sem justificativa.\n\n";
     }
-    // ---------------------------------
 
-    // --- IMPLEMENTAÇÃO LOGCAT REAL (MUDANÇA DE DATA/HORA) ---
-    // Processamento silencioso ANTES de exibir
+    // --- MUDANÇA DE DATA/HORA ---
     $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
     $logLines = [];
 
@@ -191,7 +176,6 @@ function simularScan($nomeJogo) {
     }
 
     $fusoHorario = trim(shell_exec('adb shell getprop persist.sys.timezone'));
-
     if ($fusoHorario !== "America/Sao_Paulo" && !empty($fusoHorario)) {
         echo $bold . $amarelo . "[!] Aviso: O fuso horário do dispositivo é '$fusoHorario', diferente de 'America/Sao_Paulo', possivel tentativa de Bypass.\n\n";
     }
@@ -202,46 +186,34 @@ function simularScan($nomeJogo) {
     if (!empty($logLines)) {
         foreach ($logLines as $line) {
             if (empty($line)) continue;
-
             preg_match('/(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}).*Time changed in.*by (-?\d+) second/', $line, $matches);
 
             if (!empty($matches) && $matches[1] === $dataAtual) {
                 list($hora, $minuto, $segundoComDecimal) = explode(":", $matches[2]);
                 $segundo = (int)floor($segundoComDecimal);
-
-                // Correção de ano para mktime (assume ano atual)
                 $horaAntiga = mktime($hora, $minuto, $segundo, substr($matches[1], 0, 2), substr($matches[1], 3, 2), date("Y"));
-
                 $segundosAlterados = (int)$matches[3];
-
                 $horaNova = ($segundosAlterados > 0) ? $horaAntiga - $segundosAlterados : $horaAntiga + abs($segundosAlterados);
-
-                $dataAntiga = date("d-m H:i", $horaAntiga);
-                $horaAntigaFormatada = date("H:i", $horaAntiga);
-                $horaNovaFormatada = date("H:i", $horaNova);
-                $dataNova = date("d-m", $horaNova);
 
                 $logsAlterados[] = [
                     'horaAntiga' => $horaAntiga,
                     'horaNova' => $horaNova,
-                    'horaAntigaFormatada' => $horaAntigaFormatada,
-                    'horaNovaFormatada' => $horaNovaFormatada,
+                    'horaAntigaFormatada' => date("H:i", $horaAntiga),
+                    'horaNovaFormatada' => date("H:i", $horaNova),
                     'acao' => ($segundosAlterados > 0) ? 'Atrasou' : 'Adiantou',
-                    'dataAntiga' => $dataAntiga,
-                    'dataNova' => $dataNova
+                    'dataAntiga' => date("d-m H:i", $horaAntiga),
+                    'dataNova' => date("d-m", $horaNova)
                 ];
             }
         }
     }
 
-    // Exibição dos resultados (MUDANÇA DE DATA/HORA)
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
 
     if (!empty($logsAlterados)) {
         usort($logsAlterados, function ($a, $b) {
             return $b['horaAntiga'] - $a['horaAntiga'];
         });
-
         foreach ($logsAlterados as $log) {
             echo $bold . $amarelo . "[!] Alterou horário de {$log['dataAntiga']} para {$log['dataNova']} {$log['horaNovaFormatada']} ({$log['acao']} horário)\n";
         }
@@ -254,54 +226,292 @@ function simularScan($nomeJogo) {
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
-    // --- DELAY 1: 50ms ---
     usleep(50000); 
-
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    // --- DELAY 2: 70ms ---
     usleep(70000);
-
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
-    // --- DELAY 3: 100ms ---
     usleep(100000);
-
-    // 4. CHECK REPLAY (PAUSA LONGA)
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-       // --- LÓGICA DE DATAS (AJUSTE EXATO: 3min 39s) ---
-    $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
+    // --- DATAS (219 segundos) ---
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
 
     if ($outInstall && preg_match('/firstInstallTime=([\d-]+\s[\d:]+)/', $outInstall, $matches)) {
         $timestampInstall = strtotime($matches[1]);
         $dateInstall = date("d-m-Y H:i:s", $timestampInstall);
-        
-        // Adiciona exatamente 219 segundos (3 minutos e 39 segundos)
         $dateReplay = date("d-m-Y H:i:s", $timestampInstall + 219); 
     } else {
-        // Fallback caso não encontre a data de instalação
         $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
-        // 12 minutos - 3min 39s = 8 minutos e 21 segundos atrás
         $dateReplay = date("d-m-Y H:i:s", strtotime("-8 minutes 21 seconds"));
     }
-    // -----------------------
 
     echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 5. HOLOGRAMA (PAUSA LONGA)
+    // 5. HOLOGRAMA (AGORA COM A VERIFICAÇÃO REAL INSERIDA)
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
-    processando(2.5); 
-    echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
+    
+    // =========================================================================
+    // INICIO DO CÓDIGO DE VERIFICAÇÃO REAL (INTEGRADO E CORRIGIDO)
+    // =========================================================================
+    
+    // Lista de pastas para verificar timestamps (Unificada e Dinâmica)
+    $pastasParaVerificar = [
+        "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles",
+        "/sdcard/Android/data/$pacote/files/contentcache/Optional/android",
+        "/sdcard/Android/data/$pacote/files/contentcache/Optional",
+        "/sdcard/Android/data/$pacote/files/contentcache",
+        "/sdcard/Android/data/$pacote/files",
+        "/sdcard/Android/data/$pacote",
+        "/sdcard/Android/data"
+    ];
+
+    foreach ($pastasParaVerificar as $pasta) {
+        $comandoStat = 'adb shell stat ' . escapeshellarg($pasta) . ' 2>&1';
+        $resultadoStat = shell_exec($comandoStat);
+    
+        if (strpos($resultadoStat, 'File:') !== false) {
+            preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoStat, $matchModify);
+            preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoStat, $matchChange);
+    
+            if ($matchModify && $matchChange) {
+                $dataModify = trim($matchModify[1]);
+                $dataChange = trim($matchChange[1]);
+    
+                $dataModifyFormatada = preg_replace('/\.\d+.*$/', '', $dataModify);
+                $dataChangeFormatada = preg_replace('/\.\d+.*$/', '', $dataChange);
+    
+                if ($dataModifyFormatada !== $dataChangeFormatada) {
+                    $dateTimeChange = DateTime::createFromFormat('Y-m-d H:i:s', $dataChangeFormatada);
+                    $dataChangeFormatadaLegivel = $dateTimeChange ? $dateTimeChange->format('d-m-Y H:i:s') : $dataChangeFormatada;
+                    
+                    echo $bold . $vermelho . "[!] Bypass Detectado (Modificação de Pasta)\n";
+                    echo $bold . $amarelo . "[i] Horário do renomeio/substituição: $dataChangeFormatadaLegivel\n\n";
+                }
+            }
+        }
+    }
+
+    // Lógica do arquivo .bin em MReplays
+    $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacote . '/files/MReplays" | grep "\.bin$" | head -n 1';
+    $arquivoBinMaisRecente = shell_exec($comandoFindBin);
+
+    if ($arquivoBinMaisRecente !== null && trim($arquivoBinMaisRecente) !== '') {
+        $arquivoBinMaisRecente = trim($arquivoBinMaisRecente);
+        $caminhoCompletoBin = "/sdcard/Android/data/$pacote/files/MReplays/$arquivoBinMaisRecente";
+        $comandoStatBin = 'adb shell stat ' . escapeshellarg($caminhoCompletoBin) . ' 2>&1';
+        $resultadoStatBin = shell_exec($comandoStatBin);
+        preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStatBin, $matchAccessBin);
+
+        if ($matchAccessBin) {
+            $dataAccessBin = $matchAccessBin[1];
+            $timestampAccessBinOriginal = strtotime($dataAccessBin);
+            $timestampAccessBinComMargem = $timestampAccessBinOriginal - (10 * 60); // -10 minutos
+
+            $pastasCache = [
+                "/sdcard/Android/data/$pacote/files/contentcache",
+                "/sdcard/Android/data/$pacote/files/contentcache/Optional/android"
+            ];
+
+            $bypassDetectado = false;
+            foreach ($pastasCache as $pasta) {
+                $comandoStat = 'adb shell stat ' . escapeshellarg($pasta) . ' 2>&1';
+                $resultadoStat = shell_exec($comandoStat);
+
+                preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchAccess);
+                preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchModify);
+                preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchChange);
+
+                if ($matchAccess && $matchModify && $matchChange) {
+                    $timestampAccess = strtotime($matchAccess[1]);
+                    $timestampModify = strtotime($matchModify[1]);
+                    $timestampChange = strtotime($matchChange[1]);
+
+                    if ($timestampAccess > $timestampAccessBinComMargem || 
+                        $timestampModify > $timestampAccessBinComMargem || 
+                        $timestampChange > $timestampAccessBinComMargem) {
+                        $bypassDetectado = true;
+                        break;
+                    }
+                }
+            }
+
+            if ($bypassDetectado) {
+                echo $bold . $vermelho . "[!] Alteração detectada após criação do Replay!\n\n";
+            } else {
+                echo $bold . $verde . "[+] Nenhuma alteração pós-replay detectada.\n\n";
+            }
+        } else {
+            echo $bold . $amarelo . "[!] Não foi possível obter a data do último .bin.\n";
+        }
+    } else {
+        echo $bold . $vermelho . "[!] Nenhum .bin encontrado em MReplays.\n";
+    }
+
+    // Datas de Instalação e Update
+    $cmd = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
+    $firstInstallTime = shell_exec($cmd);
+    $firstInstallDate = null;
+    if (preg_match('/firstInstallTime=(\d{4}-\d{2}-\d{2})/', $firstInstallTime, $matchInstall)) {
+        $firstInstallDate = $matchInstall[1];
+    }
+
+    $cmdUpdate = "adb shell dumpsys package $pacote | grep -i lastUpdateTime";
+    $lastUpdateTime = shell_exec($cmdUpdate);
+    $lastUpdateDate = null;
+    if (preg_match('/lastUpdateTime=(\d{4}-\d{2}-\d{2})/', $lastUpdateTime, $matchUpdate)) {
+        $lastUpdateDate = $matchUpdate[1];
+    }
+
+    // Verificação de Shaders (UnityFS)
+    $pastaShaders = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles";
+    $comandoFind = 'adb shell find ' . escapeshellarg($pastaShaders) . ' -name "shaders*" -type f 2>&1';
+    $arquivosShaders = shell_exec($comandoFind);
+    
+    if (!empty($arquivosShaders)) {
+        $listaShaders = explode("\n", trim($arquivosShaders));
+        foreach ($listaShaders as $arquivo) {
+            if (empty($arquivo)) continue;
+    
+            $comandoStat = 'adb shell stat ' . escapeshellarg($arquivo) . ' 2>&1';
+            $resultadoStat = shell_exec($comandoStat);
+    
+            if (strpos($resultadoStat, 'File:') !== false) {
+                preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchAccess);
+                preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchModify);
+                preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchChange);
+    
+                if ($matchAccess && $matchModify && $matchChange) {
+                    $accessDate = $matchAccess[1];
+                    $modifyDate = $matchModify[1];
+                    $changeDate = $matchChange[1];
+                    $nomeArquivo = basename($arquivo);
+    
+                    if ($accessDate === $modifyDate && $modifyDate === $changeDate) {
+                        $timestampArquivo = strtotime($accessDate);
+                        $ignorarAviso = false;
+                        
+                        if ($firstInstallDate) {
+                            if (abs($timestampArquivo - strtotime($firstInstallDate)) <= 86400) $ignorarAviso = true;
+                        }
+                        if (!$ignorarAviso && $lastUpdateDate) {
+                            if (abs($timestampArquivo - strtotime($lastUpdateDate)) <= 86400) $ignorarAviso = true;
+                        }
+                        
+                        if ($ignorarAviso) continue;
+                    
+                        echo $bold . $laranja . "[!] Possível Bypass Holograma detectado (ACCESS, MODIFY, CHANGE iguais)\n";
+                        echo $bold . $laranja . "[!] Arquivo: $nomeArquivo\n";
+                        echo $bold . $laranja . "[!] Data da modificação: $accessDate\n";
+                        echo $bold . $laranja . "[!] SnapShot Inconsistente.\n";
+                        continue;
+                    }
+    
+                    if ($modifyDate !== $changeDate) {
+                        echo $bold . $vermelho . "[!] Arquivo shader modificado: $nomeArquivo\n";
+                        echo $bold . $amarelo . "[i] Horário da modificação: $changeDate\n";
+                    }
+                }
+            }
+        }
+    } else {
+        echo $bold . $amarelo . "[i] Nenhum arquivo de shader encontrado.\n";
+    }
+
+    // Verificação de Pasta Shaders
+    $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
+    $encontrouBypassPasta = false;
+    $dataModifyFormatada = '';
+
+    if (!empty($resultadoPastaShaders)) {
+        preg_match('/Modify: (.*?)\n/', $resultadoPastaShaders, $matchModify);
+        preg_match('/Change: (.*?)\n/', $resultadoPastaShaders, $matchChange);
+        preg_match('/Access: (.*?)\n/', $resultadoPastaShaders, $matchAccess);
+
+        if (!empty($matchModify[1])) {
+            $dataModify = trim($matchModify[1]);
+            $dataChange = trim($matchChange[1]);
+            
+            // Remove nanosegundos para comparação
+            $cleanModify = preg_replace('/\.\d+/', '', $dataModify);
+            $cleanChange = preg_replace('/\.\d+/', '', $dataChange);
+
+            if ($cleanModify !== $cleanChange) {
+                $encontrouBypassPasta = true;
+            }
+            $dataModifyFormatada = $cleanModify;
+        }
+    }
+
+    if ($encontrouBypassPasta) {
+        echo $bold . $vermelho . "[!] Modificação de pasta detectada!\n";
+        echo $bold . $amarelo . "[*] Data da última modificação: " . $dataModifyFormatada . "\n\n";
+    } else {
+        echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n\n";
+    }
+
+    // Verificação OptionalAvatarRes
+    $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
+    $diretorioOptionalAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
+
+    // Verifica onde estão os arquivos
+    $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
+    $diretorioAlvo = (trim($checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptionalAvatarRes;
+    
+    // Lista arquivos UnityFS e verifica datas
+    $arquivosUnity = shell_exec('adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"');
+    if (!empty($arquivosUnity)) {
+        $listaUnity = explode("\n", trim($arquivosUnity));
+        $modificacaoDetectada = false;
+
+        foreach ($listaUnity as $arq) {
+            if (empty($arq)) continue;
+            // Checa cabeçalho UnityFS
+            $head = shell_exec('adb shell "head -c 20 ' . escapeshellarg($arq) . ' 2>/dev/null"');
+            if (strpos($head, "UnityFS") !== false) {
+                // Checa datas
+                $stats = shell_exec('adb shell stat -c "%y|%z" ' . escapeshellarg($arq));
+                $times = explode("|", trim($stats));
+                if (count($times) == 2 && $times[0] != $times[1]) {
+                    echo $bold . $vermelho . "[!] Modificação em arquivo UnityFS detectada: " . basename($arq) . "\n";
+                    $modificacaoDetectada = true;
+                }
+            }
+        }
+        if (!$modificacaoDetectada) echo $bold . $fverde . "[i] Nenhuma alteração suspeita nos arquivos UnityFS.\n\n";
+    } else {
+        echo $bold . $vermelho . "[!] Nenhum arquivo encontrado em AvatarRes.\n\n";
+    }
+
+    // Verificação OBB
+    echo $bold . $azul . "[+] Checando OBB...\n";
+    $diretorioObb = "/sdcard/Android/obb/$pacote";
+    $arquivosObb = shell_exec('adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"');
+    
+    if (!empty($arquivosObb)) {
+        $listaObb = explode("\n", trim($arquivosObb));
+        foreach ($listaObb as $obb) {
+            if (empty($obb)) continue;
+            $dataObb = shell_exec('adb shell stat -c "%y" ' . escapeshellarg($obb));
+            echo $amarelo . "[*] Data de modificação do arquivo OBB: " . trim($dataObb) . "\n";
+        }
+    } else {
+        echo $vermelho . "[*] OBB deletada e/ou inexistente!\n";
+    }
+
+    echo "\n";
+    // =========================================================================
+    // FIM DO CÓDIGO REAL
+    // =========================================================================
 
     echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
