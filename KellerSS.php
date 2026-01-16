@@ -201,7 +201,7 @@ function simularScan($nomeJogo) {
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    // --- LÓGICA DE DATAS ---
+    // --- LÓGICA DE DATAS (MODIFICADA) ---
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
@@ -209,10 +209,13 @@ function simularScan($nomeJogo) {
     if ($outInstall && preg_match('/firstInstallTime=([\d-]+\s[\d:]+)/', $outInstall, $matches)) {
         $timestampInstall = strtotime($matches[1]);
         $dateInstall = date("d-m-Y H:i:s", $timestampInstall);
-        $dateReplay = date("d-m-Y H:i:s", $timestampInstall + rand(32, 48)); 
+        
+        // Alterado de rand(32, 48) para 180 segundos (3 minutos exatos)
+        $dateReplay = date("d-m-Y H:i:s", $timestampInstall + 180); 
     } else {
         $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
-        $dateReplay = date("d-m-Y H:i:s", strtotime("-11 minutes 25 seconds"));
+        // Ajustado o fallback também para manter a lógica de 3 minutos após a instalação
+        $dateReplay = date("d-m-Y H:i:s", strtotime("-9 minutes"));
     }
     // -----------------------
 
@@ -274,3 +277,4 @@ while (true) {
     }
 }
 ?>
+
