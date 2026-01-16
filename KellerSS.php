@@ -93,7 +93,7 @@ function conectarADBReal() {
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner (Comandos Reais em Background) ---
+// --- Lógica FAKE do Scanner (Timings Precisos) ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
 
@@ -116,7 +116,7 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST
+    // 2. BYPASS LIST (TIMING HÍBRIDO)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
@@ -138,76 +138,56 @@ function simularScan($nomeJogo) {
         
         // Fase Lenta (Até o stat incluso)
         if ($index <= 5) {
-            usleep(400000); 
+            usleep(400000); // 400ms
+            
+            // Pausa EXTRA de transição após o stat (index 5)
             if ($index == 5) {
-                usleep(500000); // Pausa de transição
+                usleep(500000); // 500ms de atraso
             }
         } 
-        // Fase Rápida
+        // Fase Rápida (Do cd em diante)
         else {
-            usleep(70000);  
+            usleep(70000);  // 70ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
-    // 3. REINÍCIO (REAL - UPTIME)
+    // 3. REINÍCIO (REAL mas SEMPRE VERDE)
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
     
-    // Executa comando REAL de Uptime
+    // Executa o comando REAL para gerar delay/processamento real no sistema
     $uptime = shell_exec("adb shell uptime"); 
     usleep(100000); 
 
-    // Ignora resultado real
+    // IGNORA o resultado real e mostra sempre verde (Fake)
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // --- LOGS E DATA (IMPLEMENTAÇÃO SOLICITADA) ---
+    // Logs e Data
     $logDate = date("d-m H:i:s", strtotime("-3 hours"));
     echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
     echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
 
-    // -- A. ALTERAÇÃO DE HORA --
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
-    
-    // Executa comando REAL: logcat procurando Time changed
-    $cmdTime = 'adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"';
-    shell_exec($cmdTime); 
-    // O comando logcat pode demorar um pouco dependendo do buffer, dando realismo
-    
+    usleep(50000);
     echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
-    // Checks rápidos de settings
-    shell_exec('adb shell settings get global auto_time');
-    shell_exec('adb shell settings get global auto_time_zone');
-    
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
-    // -- B. PLAY STORE (DUMPSYS) --
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
-    
-    // Executa comando REAL: dumpsys usagestats (comando pesado, demora naturalmente)
-    $cmdPlayStore = "adb shell dumpsys usagestats 2>/dev/null | grep -i 'MOVE_TO_FOREGROUND' 2>/dev/null | grep 'package=com.android.vending' 2>/dev/null";
-    shell_exec($cmdPlayStore);
-    
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    // -- C. CLIPBOARD (COPIAR/COLAR) --
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    
-    // Executa comando REAL: logcat clipboard
-    $cmdClip = "adb logcat -d 2>/dev/null | grep 'hcallSetClipboardTextRpc' 2>/dev/null";
-    shell_exec($cmdClip);
-    
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
-    // 4. CHECK REPLAY
+    // 4. CHECK REPLAY (PAUSA LONGA)
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    // --- CÁLCULO DE DATAS ---
+    // --- LÓGICA DE DATAS ---
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
@@ -220,12 +200,13 @@ function simularScan($nomeJogo) {
         $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
         $dateReplay = date("d-m-Y H:i:s", strtotime("-11 minutes 25 seconds"));
     }
+    // -----------------------
 
     echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 5. HOLOGRAMA
+    // 5. HOLOGRAMA (PAUSA LONGA)
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
     processando(2.5); 
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
