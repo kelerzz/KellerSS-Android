@@ -117,9 +117,9 @@ function simularScan($nomeJogo) {
     processando(0.2);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 3. Bypass List
+    // 3. Bypass List (COM ATRASO ALEATÓRIO AGORA)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
-    processando(0.2);
+    processando(0.5); // Pequena pausa antes de começar a lista
     
     $checks = [
         "Verificando funções maliciosas no ambiente shell...",
@@ -136,7 +136,9 @@ function simularScan($nomeJogo) {
 
     foreach ($checks as $check) {
         echo $bold . $azul . "[+] $check\n";
-        usleep(80000); 
+        // Gera um atraso aleatório entre 100ms (0.1s) e 500ms (0.5s)
+        // Isso cria a sensação de "processamento" variado
+        usleep(rand(100000, 500000)); 
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
