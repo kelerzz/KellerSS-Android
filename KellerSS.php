@@ -19,10 +19,10 @@ function keller_banner(){
   echo "\e[37m
            KellerSS Android\e[36m Fucking Cheaters\e[91m\e[37m discord.gg/allianceoficial\e[91m
             
-                            )       (     (          (     
-                ( /(       )\ )  )\ )       )\ )  
+                            )        (      (           (      
+                ( /(        )\ )  )\ )        )\ )  
                         )\()) (   (()/( (()/(  (   (()/(  
-                        |((_)\  )\ 
+                        |((_)\  )\  
    /(_)) /(_)) )\   /(_)) 
                         |_ ((_)((_) (_))  (_))  ((_) (_))   
                         | |/ / | __|| |   | |   | __|| _ \  
@@ -162,14 +162,24 @@ function simularScan($nomeJogo) {
     // IGNORA o resultado real e mostra sempre verde (Fake)
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // Logs e Data
-    // LÓGICA: 3h = 10800seg | 24h = 86400seg. 
-    // O rand escolhe um valor exato em segundos nesse intervalo, variando horas, minutos e segundos.
-    $segundosAleatorios = rand(10800, 86400); 
-    $logDate = date("d-m H:i:s", time() - $segundosAleatorios);
+    // --- IMPLEMENTAÇÃO LOGCAT REAL ---
+    // Tenta pegar a data real do log do sistema
+    $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
+    preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
-    echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
-    echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
+    if (!empty($matchTime[1])) {
+        // Converte para objeto de data para garantir formatação correta (embora logcat já venha quase pronto)
+        $dateObj = DateTime::createFromFormat('m-d H:i:s', $matchTime[1]);
+        $formattedDate = $dateObj ? $dateObj->format('d-m H:i:s') : $matchTime[1];
+
+        echo $bold . $amarelo . "[+] Primeira log do sistema: " . $formattedDate . "\n";
+        echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
+    } else {
+        // Caso não tenha ADB conectado ou log vazio
+        echo $bold . $vermelho . "[!] Não foi possível capturar a data/hora do sistema (Verifique conexão ADB).\n";
+        echo $bold . $branco . "[+] W.O aplicável se a falha persistir sem justificativa.\n\n";
+    }
+    // ---------------------------------
 
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
     usleep(50000);
@@ -218,7 +228,7 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
     echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
-    echo $bold . $branco . "\t                 Com carinho, Keller...\n\n\n\n\n\n\n\n";
+    echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n\n\n\n\n";
     
     // --- CONGELAMENTO FINAL ---
     while(true) {
@@ -236,7 +246,7 @@ while (true) {
 
     echo $bold . $azul . "
       +--------------------------------------------------------------+
-      +                       KellerSS Menu                          +
+      +                           KellerSS Menu                      +
       +--------------------------------------------------------------+
       \n\n";
     
@@ -264,4 +274,3 @@ while (true) {
     }
 }
 ?>
-
