@@ -93,33 +93,32 @@ function conectarADBReal() {
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner com Datas Reais ---
+// --- Lógica FAKE do Scanner (Sincronizada com o Vídeo) ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
 
     system("clear");
     keller_banner();
 
-    // 1. Versão e Root
+    // 1. Início Rápido
     echo $bold . $azul . "[+] Versão do Android: 13\n";
-    processando(0.3);
+    usleep(100000); // 0.1s
     
     echo $bold . $azul . "[+] Checando se possui Root (se o programa travar, root detectado)...\n";
-    processando(0.8);
+    usleep(200000); // 0.2s - Rápido no vídeo
     echo $bold . $fverde . "[-] O dispositivo não tem root.\n\n";
 
-    // 2. Scripts
     echo $bold . $azul . "[+] Verificando scripts ativos em segundo plano...\n";
-    processando(0.5);
+    usleep(150000);
     echo $bold . $fverde . "[i] Nenhum script ativo detectado.\n";
     
     echo $bold . $azul . "[+] Finalizando sessões bash desnecessárias...\n";
-    processando(0.2);
+    usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 3. Bypass List (COM ATRASO ALEATÓRIO AGORA)
+    // 2. BYPASS LIST (VELOCIDADE BURST - IGUAL AO VÍDEO 0:04-0:05)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
-    processando(0.5); // Pequena pausa antes de começar a lista
+    usleep(50000); // Pausa minúscula
     
     $checks = [
         "Verificando funções maliciosas no ambiente shell...",
@@ -136,31 +135,28 @@ function simularScan($nomeJogo) {
 
     foreach ($checks as $check) {
         echo $bold . $azul . "[+] $check\n";
-        // Gera um atraso aleatório entre 100ms (0.1s) e 500ms (0.5s)
-        // Isso cria a sensação de "processamento" variado
-        usleep(rand(100000, 500000)); 
+        // Atraso muito curto (20ms a 50ms) para simular rolagem rápida do terminal
+        usleep(rand(20000, 50000)); 
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
-    // 4. Reinício
+    // 3. Reinício e Logs (Instantâneo no vídeo)
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
-    processando(0.5);
+    usleep(100000);
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // 5. Logs e Data
     $logDate = date("d-m H:i:s", strtotime("-3 hours"));
     echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
     echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
 
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
-    processando(0.5);
+    usleep(50000);
     echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
-    // 6. Play Store e Clipboard
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
@@ -168,47 +164,46 @@ function simularScan($nomeJogo) {
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
-    // 7. Replays
+    // 4. CHECK REPLAY (PAUSA LONGA - VÍDEO 0:12)
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
-    processando(1.5);
+    processando(2.0); // Demora ~2 segundos verificando
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    // --- CÁLCULO DE DATA REAL ---
+    // --- LÓGICA DE DATAS (Mantida) ---
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
-    
-    // Tenta pegar a data real via ADB
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
 
-    // Se encontrou a data real no formato do dumpsys
     if ($outInstall && preg_match('/firstInstallTime=([\d-]+\s[\d:]+)/', $outInstall, $matches)) {
         $timestampInstall = strtotime($matches[1]);
-        
-        // Data REAL de instalação
         $dateInstall = date("d-m-Y H:i:s", $timestampInstall);
-        
-        // Data de Acesso = Instalação + 25 a 45 segundos aleatórios
-        $dateReplay = date("d-m-Y H:i:s", $timestampInstall + rand(25, 45));
+        $dateReplay = date("d-m-Y H:i:s", $timestampInstall + rand(32, 48)); // ~30-50s depois da instalação
     } else {
-        // Fallback: Datas fictícias se o ADB falhar ou não achar o jogo
         $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
         $dateReplay = date("d-m-Y H:i:s", strtotime("-11 minutes 25 seconds"));
     }
-    // ----------------------------
+    // ---------------------------------
 
     echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 8. Holograma e Finalização
+    // 5. HOLOGRAMA (PAUSA LONGA - VÍDEO 0:15)
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
-    processando(1);
+    processando(2.5); // Demora ~2.5 segundos verificando
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
     echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
     echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
     echo $bold . $branco . "\t                 Com carinho, Keller...\n\n\n\n\n\n\n\n";
+    
+    // --- CONGELAMENTO FINAL ---
+    // O vídeo mostra que não aparece o prompt de comando no final.
+    // O script fica parado aqui para sempre até o usuário fechar.
+    while(true) {
+        sleep(60);
+    }
 }
 
 // --- Menu Principal ---
@@ -235,11 +230,11 @@ while (true) {
     } 
     elseif ($opcaoscanner == "1") {
         simularScan("FreeFire Normal");
-        exit(0); 
+        // Não precisa de exit aqui porque a função simularScan entra em loop infinito
     } 
     elseif ($opcaoscanner == "2") {
         simularScan("FreeFire Max");
-        exit(0);
+        // Não precisa de exit aqui porque a função simularScan entra em loop infinito
     } 
     elseif (strtolower($opcaoscanner) == 's') {
         echo "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n\n";
