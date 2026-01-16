@@ -93,7 +93,7 @@ function conectarADBReal() {
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner (Timing 100ms -> 30ms) ---
+// --- Lógica FAKE do Scanner (Timing 400ms -> 500ms Pausa -> 70ms) ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
 
@@ -116,7 +116,7 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST (TIMING EXATO SOLICITADO)
+    // 2. BYPASS LIST (TIMING ESPECÍFICO)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
@@ -126,7 +126,7 @@ function simularScan($nomeJogo) {
         "Verificando processos suspeitos...",                   // 2 (Lento)
         "Verificando arquivos de configuração...",              // 3 (Lento)
         "Testando comportamento real das funções...",           // 4 (Lento)
-        "Testando manipulação da função stat...",               // 5 (Último Lento)
+        "Testando manipulação da função stat...",               // 5 (Último Lento + Pausa)
         "Testando comportamento do comando cd...",              // 6 (Rápido)
         "Testando integridade de comandos básicos...",          // 7 (Rápido)
         "Testando bloqueio de comandos pkg...",                 // 8 (Rápido)
@@ -138,11 +138,16 @@ function simularScan($nomeJogo) {
         
         // Fase Lenta (Até o stat incluso)
         if ($index <= 5) {
-            usleep(100000); // 100ms
+            usleep(400000); // 400ms
+            
+            // Pausa EXTRA de transição após o stat (index 5)
+            if ($index == 5) {
+                usleep(500000); // 500ms de atraso extra antes de acelerar
+            }
         } 
         // Fase Rápida (Do cd em diante)
         else {
-            usleep(30000);  // 30ms
+            usleep(70000);  // 70ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
