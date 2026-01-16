@@ -459,38 +459,74 @@ function simularScan($nomeJogo) {
         echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n\n";
     }
 
-    // Verificação OptionalAvatarRes
-    $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
-    $diretorioOptionalAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
+    // Limpa erros visuais do PHP para não sujar o terminal
+                error_reporting(0);
 
-    // Verifica onde estão os arquivos
-    $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
-    $diretorioAlvo = (trim($checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptionalAvatarRes;
-    
-    // Lista arquivos UnityFS e verifica datas
-    $arquivosUnity = shell_exec('adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"');
-    if (!empty($arquivosUnity)) {
-        $listaUnity = explode("\n", trim($arquivosUnity));
-        $modificacaoDetectada = false;
+                $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
+                $diretorioOptionalAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
 
-        foreach ($listaUnity as $arq) {
-            if (empty($arq)) continue;
-            // Checa cabeçalho UnityFS
-            $head = shell_exec('adb shell "head -c 20 ' . escapeshellarg($arq) . ' 2>/dev/null"');
-            if (strpos($head, "UnityFS") !== false) {
-                // Checa datas
-                $stats = shell_exec('adb shell stat -c "%y|%z" ' . escapeshellarg($arq));
-                $times = explode("|", trim($stats));
-                if (count($times) == 2 && $times[0] != $times[1]) {
-                    echo $bold . $vermelho . "[!] Modificação em arquivo UnityFS detectada: " . basename($arq) . "\n";
-                    $modificacaoDetectada = true;
+                // Verifica onde estão os arquivos
+                $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
+                $diretorioAlvo = (trim((string)$checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptionalAvatarRes;
+                
+                // Lista arquivos UnityFS e verifica datas
+                // O 2>/dev/null cala a boca do stderr do ADB se a pasta não existir
+                $comandoListar = 'adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"';
+                $arquivosUnity = shell_exec($comandoListar);
+                
+                $modificacaoDetectada = false;
+
+                if (!empty($arquivosUnity)) {
+                    // Explode e filtra linhas vazias IMEDIATAMENTE
+                    $listaUnity = array_filter(explode("\n", $arquivosUnity), function($value) {
+                        return !empty(trim($value));
+                    });
+
+                    foreach ($listaUnity as $arq) {
+                        $arq = trim($arq);
+                        if (empty($arq)) continue; // Segurança extra
+
+                        // Checa cabeçalho UnityFS (primeiros 20 bytes)
+                        $head = shell_exec('adb shell "head -c 20 ' . escapeshellarg($arq) . ' 2>/dev/null"');
+                        
+                        if (strpos((string)$head, "UnityFS") !== false) {
+                            // Obtém Access, Modify e Change de uma vez só
+                            // Formato esperado do stat android: Access: ... Modify: ... Change: ...
+                            $stats = shell_exec('adb shell stat ' . escapeshellarg($arq) . ' 2>/dev/null');
+                            
+                            if (empty($stats)) continue;
+
+                            preg_match('/Modify: (.*?)\n/', $stats, $mMod);
+                            preg_match('/Change: (.*?)\n/', $stats, $mChg);
+
+                            if (!empty($mMod[1]) && !empty($mChg[1])) {
+                                // Limpa os milissegundos (.0000000) e espaços
+                                $tMod = preg_replace('/\.\d+.*$/', '', trim($mMod[1]));
+                                $tChg = preg_replace('/\.\d+.*$/', '', trim($mChg[1]));
+                                
+                                // Converte para timestamp para comparação segura
+                                $tsMod = strtotime($tMod);
+                                $tsChg = strtotime($tChg);
+
+                                // Se a data de modificação for diferente da data de mudança (metadata), é um indício forte
+                                if ($tsMod !== false && $tsChg !== false && $tsMod != $tsChg) {
+                                    echo $bold . $vermelho . "[!] Modificação em arquivo UnityFS detectada: " . basename($arq) . "\n";
+                                    echo $bold . $amarelo . "    Modificado: " . date("d-m-Y H:i:s", $tsMod) . "\n";
+                                    echo $bold . $amarelo . "    Alterado:   " . date("d-m-Y H:i:s", $tsChg) . "\n\n";
+                                    $modificacaoDetectada = true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // MENSAGEM POSITIVA QUE VOCÊ QUERIA
+                    if (!$modificacaoDetectada) {
+                        echo $bold . $fverde . "[i] Nenhuma alteração suspeita nos arquivos UnityFS (AvatarRes).\n\n";
+                    }
+                } else {
+                    // Se não achou arquivos, considera limpo ou avisa que não tem cache
+                    echo $bold . $fverde . "[i] Nenhum cache de AvatarRes encontrado para verificar (Limpo).\n\n";
                 }
-            }
-        }
-        if (!$modificacaoDetectada) echo $bold . $fverde . "[i] Nenhuma alteração suspeita nos arquivos UnityFS.\n\n";
-    } else {
-        echo $bold . $vermelho . "[!] Nenhum arquivo encontrado em AvatarRes.\n\n";
-    }
 
     // Verificação OBB
     echo $bold . $azul . "[+] Checando OBB...\n";
@@ -562,3 +598,4 @@ while (true) {
     }
 }
 ?>
+
