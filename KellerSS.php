@@ -163,7 +163,11 @@ function simularScan($nomeJogo) {
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
     // Logs e Data
-    $logDate = date("d-m H:i:s", strtotime("-3 hours"));
+    // LÓGICA: 3h = 10800seg | 24h = 86400seg. 
+    // O rand escolhe um valor exato em segundos nesse intervalo, variando horas, minutos e segundos.
+    $segundosAleatorios = rand(10800, 86400); 
+    $logDate = date("d-m H:i:s", time() - $segundosAleatorios);
+
     echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
     echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
 
@@ -260,3 +264,4 @@ while (true) {
     }
 }
 ?>
+
