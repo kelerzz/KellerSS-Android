@@ -162,7 +162,7 @@ function simularScan($nomeJogo) {
     // IGNORA o resultado real e mostra sempre verde (Fake)
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // --- IMPLEMENTAÇÃO LOGCAT REAL ---
+    // --- IMPLEMENTAÇÃO LOGCAT REAL (DATA SISTEMA) ---
     // Tenta pegar a data real do log do sistema
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
@@ -181,9 +181,73 @@ function simularScan($nomeJogo) {
     }
     // ---------------------------------
 
+    // --- IMPLEMENTAÇÃO LOGCAT REAL (MUDANÇA DE DATA/HORA) ---
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
-    usleep(50000);
-    echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
+
+    $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
+    $logLines = [];
+
+    if ($logcatOutput !== null && trim($logcatOutput) !== "") {
+        $logLines = explode("\n", trim($logcatOutput));
+    }
+
+    $fusoHorario = trim(shell_exec('adb shell getprop persist.sys.timezone'));
+
+    if ($fusoHorario !== "America/Sao_Paulo" && !empty($fusoHorario)) {
+        echo $bold . $amarelo . "[!] Aviso: O fuso horário do dispositivo é '$fusoHorario', diferente de 'America/Sao_Paulo', possivel tentativa de Bypass.\n\n";
+    }
+
+    $dataAtual = date("m-d");
+    $logsAlterados = [];
+
+    if (!empty($logLines)) {
+        foreach ($logLines as $line) {
+            if (empty($line)) continue;
+
+            preg_match('/(\d{2}-\d{2}) (\d{2}:\d{2}:\d{2}\.\d{3}).*Time changed in.*by (-?\d+) second/', $line, $matches);
+
+            if (!empty($matches) && $matches[1] === $dataAtual) {
+                list($hora, $minuto, $segundoComDecimal) = explode(":", $matches[2]);
+                $segundo = (int)floor($segundoComDecimal);
+
+                // Correção de ano para mktime (assume ano atual)
+                $horaAntiga = mktime($hora, $minuto, $segundo, substr($matches[1], 0, 2), substr($matches[1], 3, 2), date("Y"));
+
+                $segundosAlterados = (int)$matches[3];
+
+                $horaNova = ($segundosAlterados > 0) ? $horaAntiga - $segundosAlterados : $horaAntiga + abs($segundosAlterados);
+
+                $dataAntiga = date("d-m H:i", $horaAntiga);
+                $horaAntigaFormatada = date("H:i", $horaAntiga);
+                $horaNovaFormatada = date("H:i", $horaNova);
+                $dataNova = date("d-m", $horaNova);
+
+                $logsAlterados[] = [
+                    'horaAntiga' => $horaAntiga,
+                    'horaNova' => $horaNova,
+                    'horaAntigaFormatada' => $horaAntigaFormatada,
+                    'horaNovaFormatada' => $horaNovaFormatada,
+                    'acao' => ($segundosAlterados > 0) ? 'Atrasou' : 'Adiantou',
+                    'dataAntiga' => $dataAntiga,
+                    'dataNova' => $dataNova
+                ];
+            }
+        }
+    }
+
+    if (!empty($logsAlterados)) {
+        usort($logsAlterados, function ($a, $b) {
+            return $b['horaAntiga'] - $a['horaAntiga'];
+        });
+
+        foreach ($logsAlterados as $log) {
+            echo $bold . $amarelo . "[!] Alterou horário de {$log['dataAntiga']} para {$log['dataNova']} {$log['horaNovaFormatada']} ({$log['acao']} horário)\n";
+        }
+        echo "\n";
+    } else {
+        echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
+    }
+    // --------------------------------------------------------
 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
@@ -278,5 +342,3 @@ while (true) {
     }
 }
 ?>
-
-
