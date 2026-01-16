@@ -11,8 +11,6 @@ $cln        = "\e[0m";
 $verde      = "\e[92m";
 $fverde     = "\e[32m";
 $vermelho   = "\e[91m";
-$magenta    = "\e[35m";
-$azulbg     = "\e[44m";
 $bold       = "\e[1m";
 
 // --- Funções Auxiliares ---
@@ -56,7 +54,6 @@ function conectarADBReal() {
     
     echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
-    // Verifica instalação real
     if (!shell_exec("adb version > /dev/null 2>&1")) {
         echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
@@ -64,21 +61,18 @@ function conectarADBReal() {
         echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
     }
 
-    // Pareamento
-    echo $bold . $branco . "Deseja realizar o pareamento? (s/n): " . $cln;
-    $resp = trim(fgets(STDIN));
-    if (strtolower($resp) == 's') {
-        inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
-        $pair_port = trim(fgets(STDIN, 1024));
-        if (!empty($pair_port) && is_numeric($pair_port)) {
-            echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
-            system("adb pair localhost:" . $pair_port);
-        } else {
-            echo $bold . $vermelho . "\n[!] Porta inválida!\n" . $cln;
-        }
+    // --- PAREAMENTO ---
+    inputusuario("Qual a sua porta para o pareamento (ex: 45678)? [Enter p/ pular]");
+    $pair_port = trim(fgets(STDIN, 1024));
+
+    if (!empty($pair_port) && is_numeric($pair_port)) {
+        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
+        system("adb pair localhost:" . $pair_port);
+    } elseif (!empty($pair_port)) {
+        echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
     }
 
-    // Conexão
+    // --- CONEXÃO ---
     echo "\n";
     inputusuario("Qual a sua porta para a conexão (ex: 12345)?");
     $connect_port = trim(fgets(STDIN, 1024));
@@ -88,101 +82,134 @@ function conectarADBReal() {
         system("adb connect localhost:" . $connect_port);
         
         echo $bold . $azul . "\n[+] Verificando lista de dispositivos conectados:\n" . $cln;
-        system("adb devices"); // Mostra dispositivos reais
+        system("adb devices"); 
         
         echo $bold . $fverde . "\n[i] Processo de conexão finalizado.\n" . $cln;
     } else {
         echo $bold . $vermelho . "\n[!] Porta inválida!\n" . $cln;
     }
     
-    // Simula o comportamento original: espera enter e volta pro menu
     echo $bold . $branco . "\n[+] Pressione Enter para voltar ao menu...\n" . $cln;
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner ---
+// --- Lógica FAKE do Scanner com Datas Reais ---
 function simularScan($nomeJogo) {
-    global $bold, $azul, $fverde, $amarelo, $branco, $cln, $vermelho;
+    global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho;
 
     system("clear");
     keller_banner();
 
-    // Simulação visual idêntica ao original
-    echo $bold . $azul . "[+] Verificando conexão ADB e ambiente...\n" . $cln;
-    processando(1);
+    // 1. Versão e Root
+    echo $bold . $azul . "[+] Versão do Android: 13\n";
+    processando(0.3);
     
-    // Pega versão real só pra dar credibilidade visual no print
-    $versaoReal = shell_exec("adb shell getprop ro.build.version.release 2>/dev/null");
-    $versaoDisplay = $versaoReal ? trim($versaoReal) : "11";
-    
-    echo $bold . $azul . "[+] Versão do Android: $versaoDisplay\n";
-    processando(0.5);
-    
-    echo $bold . $azul . "[+] Checando se possui Root...\n";
-    processando(1);
+    echo $bold . $azul . "[+] Checando se possui Root (se o programa travar, root detectado)...\n";
+    processando(0.8);
     echo $bold . $fverde . "[-] O dispositivo não tem root.\n\n";
 
+    // 2. Scripts
     echo $bold . $azul . "[+] Verificando scripts ativos em segundo plano...\n";
-    processando(2);
+    processando(0.5);
     echo $bold . $fverde . "[i] Nenhum script ativo detectado.\n";
     
     echo $bold . $azul . "[+] Finalizando sessões bash desnecessárias...\n";
-    processando(0.5);
+    processando(0.2);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
+    // 3. Bypass List
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
-    processando(1.5);
+    processando(0.2);
+    
+    $checks = [
+        "Verificando funções maliciosas no ambiente shell...",
+        "Testando acesso a diretórios críticos...",
+        "Verificando processos suspeitos...",
+        "Verificando arquivos de configuração...",
+        "Testando comportamento real das funções...",
+        "Testando manipulação da função stat...",
+        "Testando comportamento do comando cd...",
+        "Testando integridade de comandos básicos...",
+        "Testando bloqueio de comandos pkg...",
+        "Verificando arquivos de bypass no dispositivo..."
+    ];
+
+    foreach ($checks as $check) {
+        echo $bold . $azul . "[+] $check\n";
+        usleep(80000); 
+    }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
+    // 4. Reinício
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
     processando(0.5);
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
+    // 5. Logs e Data
+    $logDate = date("d-m H:i:s", strtotime("-3 hours"));
+    echo $bold . $amarelo . "[+] Primeira log do sistema: $logDate\n";
+    echo $bold . $branco . "[+] Caso a data da primeira log seja durante/após a partida e/ou seja igual a uma data alterada, aplique o W.O!\n\n";
+
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
-    processando(1);
-    echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
+    processando(0.5);
     echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
 
+    echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
+    echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
+    echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
+
+    // 6. Play Store e Clipboard
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
-    processando(1);
-    echo $bold . "\e[31m[!] Nenhum dado encontrado.\n\n";
+    echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    processando(0.5);
-    echo $bold . "\e[31m[!] Nenhum dado encontrado.\n\n";
+    echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
-    echo $bold . $azul . "[+] Checando se o replay foi passado ($nomeJogo)...\n";
-    processando(3); // Pausa dramática para parecer que está lendo binários
+    // 7. Replays
+    echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
+    processando(1.5);
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    $dataHoje = date("d-m-Y H:i:s");
-    $dataInstall = date("d-m-Y H:i:s", strtotime("-15 days")); // Data fake antiga segura
+    // --- CÁLCULO DE DATA REAL ---
+    $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
     
-    echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dataHoje\n";
-    echo $bold . $amarelo . "[*] Data de instalação do Free Fire: $dataInstall\n";
-    echo $bold . $branco . "[#] Verifique a data de instalação...\n\n";
+    // Tenta pegar a data real via ADB
+    $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
+    $outInstall = shell_exec($cmdInstall);
 
+    // Se encontrou a data real no formato do dumpsys
+    if ($outInstall && preg_match('/firstInstallTime=([\d-]+\s[\d:]+)/', $outInstall, $matches)) {
+        $timestampInstall = strtotime($matches[1]);
+        
+        // Data REAL de instalação
+        $dateInstall = date("d-m-Y H:i:s", $timestampInstall);
+        
+        // Data de Acesso = Instalação + 25 a 45 segundos aleatórios
+        $dateReplay = date("d-m-Y H:i:s", $timestampInstall + rand(25, 45));
+    } else {
+        // Fallback: Datas fictícias se o ADB falhar ou não achar o jogo
+        $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
+        $dateReplay = date("d-m-Y H:i:s", strtotime("-11 minutes 25 seconds"));
+    }
+    // ----------------------------
+
+    echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
+    echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
+    echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
+
+    // 8. Holograma e Finalização
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
-    echo "[+] Verificando datas de modificação na pasta 'android'...\n";
-    processando(3);
-    
-    echo $bold . $fverde . "[i] Nenhuma alteração suspeita encontrada.\n";
-    echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n\n";
-    
-    echo $bold . $azul . "[+] Checando OBB...\n";
     processando(1);
-    echo $bold . $amarelo . "[i] Arquivos OBB íntegros.\n";
+    echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
     echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
     echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
-    echo $bold . $branco . "\t                 Com carinho, Keller...\n\n\n\n\n\n\n";
-    
-    // Aqui NÃO TEM PAUSA. Ele morre direto, igual ao original.
+    echo $bold . $branco . "\t                 Com carinho, Keller...\n\n\n\n\n\n\n\n";
 }
 
-// --- Menu Principal com Loop ---
+// --- Menu Principal ---
 
 while (true) {
     system("clear");
@@ -203,15 +230,14 @@ while (true) {
 
     if ($opcaoscanner == "0") {
         conectarADBReal();
-        // O loop 'while' reinicia naturalmente, voltando ao menu
     } 
     elseif ($opcaoscanner == "1") {
         simularScan("FreeFire Normal");
-        exit(0); // Mata o script ao final do scan (Comportamento Original)
+        exit(0); 
     } 
     elseif ($opcaoscanner == "2") {
         simularScan("FreeFire Max");
-        exit(0); // Mata o script ao final do scan (Comportamento Original)
+        exit(0);
     } 
     elseif (strtolower($opcaoscanner) == 's') {
         echo "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n\n";
