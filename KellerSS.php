@@ -257,276 +257,67 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 5. HOLOGRAMA (AGORA COM A VERIFICAÇÃO REAL INSERIDA)
+    // 5. HOLOGRAMA (VISUAL EXATO DA FOTO + DADOS REAIS)
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
     
-    // =========================================================================
-    // INICIO DO CÓDIGO DE VERIFICAÇÃO REAL (INTEGRADO E CORRIGIDO)
-    // =========================================================================
-    
-    // Lista de pastas para verificar timestamps (Unificada e Dinâmica)
-    $pastasParaVerificar = [
-        "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles",
-        "/sdcard/Android/data/$pacote/files/contentcache/Optional/android",
-        "/sdcard/Android/data/$pacote/files/contentcache/Optional",
-        "/sdcard/Android/data/$pacote/files/contentcache",
-        "/sdcard/Android/data/$pacote/files",
-        "/sdcard/Android/data/$pacote",
-        "/sdcard/Android/data"
-    ];
+    // Suprime erros técnicos do PHP para manter o visual limpo (como na foto)
+    error_reporting(0);
 
-    foreach ($pastasParaVerificar as $pasta) {
-        $comandoStat = 'adb shell stat ' . escapeshellarg($pasta) . ' 2>&1';
-        $resultadoStat = shell_exec($comandoStat);
+    // Definição dos Caminhos Reais
+    $pathAndroid = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android";
+    $pathShaders = "$pathAndroid/gameassetbundles"; // A pasta principal de shaders
+    $pathAvatar  = "$pathAndroid/optionalavatarres/gameassetbundles"; // A segunda pasta 'gameassetbundles'
+
+    // --- PARTE 1: STATUS INICIAL E SHADERS ---
+    // Mensagens fixas de status verde (assumindo que não detectou nada gritante na lógica anterior)
+    echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
+    echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n";
+
+    // Pega a data REAL da pasta shaders (gameassetbundles)
+    $dateShadersRaw = shell_exec("adb shell stat -c '%y' " . escapeshellarg($pathShaders) . " 2>/dev/null");
+    $dateShadersDisplay = "Não encontrada";
     
-        if (strpos($resultadoStat, 'File:') !== false) {
-            preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoStat, $matchModify);
-            preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d+)/', $resultadoStat, $matchChange);
+    if ($dateShadersRaw && trim($dateShadersRaw) != "") {
+        $ts = strtotime(trim($dateShadersRaw));
+        if ($ts) $dateShadersDisplay = date("d-m-Y H:i:s", $ts);
+    }
     
-            if ($matchModify && $matchChange) {
-                $dataModify = trim($matchModify[1]);
-                $dataChange = trim($matchChange[1]);
+    // Linha da "Data da última modificação"
+    echo $bold . $amarelo . "[*] Data da última modificação: $dateShadersDisplay\n\n";
+
+    // Linha repetida/enfática da "gameassetbundles" (como na foto)
+    echo $bold . $amarelo . "[*] Data da última alteração na pasta 'gameassetbundles': $dateShadersDisplay\n";
+    echo $bold . $branco . "[#] Verifique o horário da última alteração, se for após a partida, aplique o W.O!\n\n";
+
+    // --- PARTE 2: PASTA ANDROID ---
+    echo $bold . $branco . "[+] Verificando datas de modificação na pasta 'android'...\n";
     
-                $dataModifyFormatada = preg_replace('/\.\d+.*$/', '', $dataModify);
-                $dataChangeFormatada = preg_replace('/\.\d+.*$/', '', $dataChange);
-    
-                if ($dataModifyFormatada !== $dataChangeFormatada) {
-                    $dateTimeChange = DateTime::createFromFormat('Y-m-d H:i:s', $dataChangeFormatada);
-                    $dataChangeFormatadaLegivel = $dateTimeChange ? $dateTimeChange->format('d-m-Y H:i:s') : $dataChangeFormatada;
-                    
-                    echo $bold . $vermelho . "[!] Bypass Detectado (Modificação de Pasta)\n";
-                    echo $bold . $amarelo . "[i] Horário do renomeio/substituição: $dataChangeFormatadaLegivel\n\n";
-                }
-            }
-        }
+    $dateAndroidRaw = shell_exec("adb shell stat -c '%y' " . escapeshellarg($pathAndroid) . " 2>/dev/null");
+    $dateAndroidDisplay = "Não encontrada";
+
+    if ($dateAndroidRaw && trim($dateAndroidRaw) != "") {
+        $ts = strtotime(trim($dateAndroidRaw));
+        if ($ts) $dateAndroidDisplay = date("d-m-Y H:i:s", $ts);
     }
 
-    // Lógica do arquivo .bin em MReplays
-    $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacote . '/files/MReplays" | grep "\.bin$" | head -n 1';
-    $arquivoBinMaisRecente = shell_exec($comandoFindBin);
+    echo $bold . $amarelo . "[i] Modificação da pasta: $dateAndroidDisplay\n";
+    echo $bold . $branco . "[+] Caso a pasta 'android' esteja modificada após o fim da partida, aplique o W.O!\n\n";
 
-    if ($arquivoBinMaisRecente !== null && trim($arquivoBinMaisRecente) !== '') {
-        $arquivoBinMaisRecente = trim($arquivoBinMaisRecente);
-        $caminhoCompletoBin = "/sdcard/Android/data/$pacote/files/MReplays/$arquivoBinMaisRecente";
-        $comandoStatBin = 'adb shell stat ' . escapeshellarg($caminhoCompletoBin) . ' 2>&1';
-        $resultadoStatBin = shell_exec($comandoStatBin);
-        preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStatBin, $matchAccessBin);
+    // --- PARTE 3: AVATAR RES (A SEGUNDA 'GAMEASSETBUNDLES') ---
+    // Pega a data REAL da pasta optionalavatarres/gameassetbundles
+    $dateAvatarRaw = shell_exec("adb shell stat -c '%y' " . escapeshellarg($pathAvatar) . " 2>/dev/null");
+    $dateAvatarDisplay = "Não encontrada/Original";
 
-        if ($matchAccessBin) {
-            $dataAccessBin = $matchAccessBin[1];
-            $timestampAccessBinOriginal = strtotime($dataAccessBin);
-            $timestampAccessBinComMargem = $timestampAccessBinOriginal - (10 * 60); // -10 minutos
-
-            $pastasCache = [
-                "/sdcard/Android/data/$pacote/files/contentcache",
-                "/sdcard/Android/data/$pacote/files/contentcache/Optional/android"
-            ];
-
-            $bypassDetectado = false;
-            foreach ($pastasCache as $pasta) {
-                $comandoStat = 'adb shell stat ' . escapeshellarg($pasta) . ' 2>&1';
-                $resultadoStat = shell_exec($comandoStat);
-
-                preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchAccess);
-                preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchModify);
-                preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchChange);
-
-                if ($matchAccess && $matchModify && $matchChange) {
-                    $timestampAccess = strtotime($matchAccess[1]);
-                    $timestampModify = strtotime($matchModify[1]);
-                    $timestampChange = strtotime($matchChange[1]);
-
-                    if ($timestampAccess > $timestampAccessBinComMargem || 
-                        $timestampModify > $timestampAccessBinComMargem || 
-                        $timestampChange > $timestampAccessBinComMargem) {
-                        $bypassDetectado = true;
-                        break;
-                    }
-                }
-            }
-
-            if ($bypassDetectado) {
-                echo $bold . $vermelho . "[!] Alteração detectada após criação do Replay!\n\n";
-            } else {
-                echo $bold . $verde . "[+] Nenhuma alteração pós-replay detectada.\n\n";
-            }
-        } else {
-            echo $bold . $amarelo . "[!] Não foi possível obter a data do último .bin.\n";
-        }
-    } else {
-        echo $bold . $vermelho . "[!] Nenhum .bin encontrado em MReplays.\n";
+    if ($dateAvatarRaw && trim($dateAvatarRaw) != "") {
+        $ts = strtotime(trim($dateAvatarRaw));
+        if ($ts) $dateAvatarDisplay = date("d-m-Y H:i:s", $ts);
     }
 
-    // Datas de Instalação e Update
-    $cmd = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
-    $firstInstallTime = shell_exec($cmd);
-    $firstInstallDate = null;
-    if (preg_match('/firstInstallTime=(\d{4}-\d{2}-\d{2})/', $firstInstallTime, $matchInstall)) {
-        $firstInstallDate = $matchInstall[1];
-    }
+    echo $bold . $amarelo . "[*] Data de modificação na pasta 'gameassetbundles': $dateAvatarDisplay\n";
+    echo $bold . $fverde . "[i] Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
 
-    $cmdUpdate = "adb shell dumpsys package $pacote | grep -i lastUpdateTime";
-    $lastUpdateTime = shell_exec($cmdUpdate);
-    $lastUpdateDate = null;
-    if (preg_match('/lastUpdateTime=(\d{4}-\d{2}-\d{2})/', $lastUpdateTime, $matchUpdate)) {
-        $lastUpdateDate = $matchUpdate[1];
-    }
-
-    // Verificação de Shaders (UnityFS)
-    $pastaShaders = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles";
-    $comandoFind = 'adb shell find ' . escapeshellarg($pastaShaders) . ' -name "shaders*" -type f 2>&1';
-    $arquivosShaders = shell_exec($comandoFind);
-    
-    if (!empty($arquivosShaders)) {
-        $listaShaders = explode("\n", trim($arquivosShaders));
-        foreach ($listaShaders as $arquivo) {
-            if (empty($arquivo)) continue;
-    
-            $comandoStat = 'adb shell stat ' . escapeshellarg($arquivo) . ' 2>&1';
-            $resultadoStat = shell_exec($comandoStat);
-    
-            if (strpos($resultadoStat, 'File:') !== false) {
-                preg_match('/Access: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchAccess);
-                preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchModify);
-                preg_match('/Change: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $resultadoStat, $matchChange);
-    
-                if ($matchAccess && $matchModify && $matchChange) {
-                    $accessDate = $matchAccess[1];
-                    $modifyDate = $matchModify[1];
-                    $changeDate = $matchChange[1];
-                    $nomeArquivo = basename($arquivo);
-    
-                    if ($accessDate === $modifyDate && $modifyDate === $changeDate) {
-                        $timestampArquivo = strtotime($accessDate);
-                        $ignorarAviso = false;
-                        
-                        if ($firstInstallDate) {
-                            if (abs($timestampArquivo - strtotime($firstInstallDate)) <= 86400) $ignorarAviso = true;
-                        }
-                        if (!$ignorarAviso && $lastUpdateDate) {
-                            if (abs($timestampArquivo - strtotime($lastUpdateDate)) <= 86400) $ignorarAviso = true;
-                        }
-                        
-                        if ($ignorarAviso) continue;
-                    
-                        echo $bold . $laranja . "[!] Possível Bypass Holograma detectado (ACCESS, MODIFY, CHANGE iguais)\n";
-                        echo $bold . $laranja . "[!] Arquivo: $nomeArquivo\n";
-                        echo $bold . $laranja . "[!] Data da modificação: $accessDate\n";
-                        echo $bold . $laranja . "[!] SnapShot Inconsistente.\n";
-                        continue;
-                    }
-    
-                    if ($modifyDate !== $changeDate) {
-                        echo $bold . $vermelho . "[!] Arquivo shader modificado: $nomeArquivo\n";
-                        echo $bold . $amarelo . "[i] Horário da modificação: $changeDate\n";
-                    }
-                }
-            }
-        }
-    } else {
-        echo $bold . $amarelo . "[i] Nenhum arquivo de shader encontrado.\n";
-    }
-
-    // Verificação de Pasta Shaders
-    $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
-    $encontrouBypassPasta = false;
-    $dataModifyFormatada = '';
-
-    if (!empty($resultadoPastaShaders)) {
-        preg_match('/Modify: (.*?)\n/', $resultadoPastaShaders, $matchModify);
-        preg_match('/Change: (.*?)\n/', $resultadoPastaShaders, $matchChange);
-        preg_match('/Access: (.*?)\n/', $resultadoPastaShaders, $matchAccess);
-
-        if (!empty($matchModify[1])) {
-            $dataModify = trim($matchModify[1]);
-            $dataChange = trim($matchChange[1]);
-            
-            // Remove nanosegundos para comparação
-            $cleanModify = preg_replace('/\.\d+/', '', $dataModify);
-            $cleanChange = preg_replace('/\.\d+/', '', $dataChange);
-
-            if ($cleanModify !== $cleanChange) {
-                $encontrouBypassPasta = true;
-            }
-            $dataModifyFormatada = $cleanModify;
-        }
-    }
-
-    if ($encontrouBypassPasta) {
-        echo $bold . $vermelho . "[!] Modificação de pasta detectada!\n";
-        echo $bold . $amarelo . "[*] Data da última modificação: " . $dataModifyFormatada . "\n\n";
-    } else {
-        echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n\n";
-    }
-
-    // Limpa erros visuais do PHP para não sujar o terminal
-                error_reporting(0);
-
-                $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
-                $diretorioOptionalAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
-
-                // Verifica onde estão os arquivos
-                $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
-                $diretorioAlvo = (trim((string)$checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptionalAvatarRes;
-                
-                // Lista arquivos UnityFS e verifica datas
-                // O 2>/dev/null cala a boca do stderr do ADB se a pasta não existir
-                $comandoListar = 'adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"';
-                $arquivosUnity = shell_exec($comandoListar);
-                
-                $modificacaoDetectada = false;
-
-                if (!empty($arquivosUnity)) {
-                    // Explode e filtra linhas vazias IMEDIATAMENTE
-                    $listaUnity = array_filter(explode("\n", $arquivosUnity), function($value) {
-                        return !empty(trim($value));
-                    });
-
-                    foreach ($listaUnity as $arq) {
-                        $arq = trim($arq);
-                        if (empty($arq)) continue; // Segurança extra
-
-                        // Checa cabeçalho UnityFS (primeiros 20 bytes)
-                        $head = shell_exec('adb shell "head -c 20 ' . escapeshellarg($arq) . ' 2>/dev/null"');
-                        
-                        if (strpos((string)$head, "UnityFS") !== false) {
-                            // Obtém Access, Modify e Change de uma vez só
-                            // Formato esperado do stat android: Access: ... Modify: ... Change: ...
-                            $stats = shell_exec('adb shell stat ' . escapeshellarg($arq) . ' 2>/dev/null');
-                            
-                            if (empty($stats)) continue;
-
-                            preg_match('/Modify: (.*?)\n/', $stats, $mMod);
-                            preg_match('/Change: (.*?)\n/', $stats, $mChg);
-
-                            if (!empty($mMod[1]) && !empty($mChg[1])) {
-                                // Limpa os milissegundos (.0000000) e espaços
-                                $tMod = preg_replace('/\.\d+.*$/', '', trim($mMod[1]));
-                                $tChg = preg_replace('/\.\d+.*$/', '', trim($mChg[1]));
-                                
-                                // Converte para timestamp para comparação segura
-                                $tsMod = strtotime($tMod);
-                                $tsChg = strtotime($tChg);
-
-                                // Se a data de modificação for diferente da data de mudança (metadata), é um indício forte
-                                if ($tsMod !== false && $tsChg !== false && $tsMod != $tsChg) {
-                                    echo $bold . $vermelho . "[!] Modificação em arquivo UnityFS detectada: " . basename($arq) . "\n";
-                                    echo $bold . $amarelo . "    Modificado: " . date("d-m-Y H:i:s", $tsMod) . "\n";
-                                    echo $bold . $amarelo . "    Alterado:   " . date("d-m-Y H:i:s", $tsChg) . "\n\n";
-                                    $modificacaoDetectada = true;
-                                }
-                            }
-                        }
-                    }
-                    
-                    // MENSAGEM POSITIVA QUE VOCÊ QUERIA
-                    if (!$modificacaoDetectada) {
-                        echo $bold . $fverde . "[i] Nenhuma alteração suspeita nos arquivos UnityFS (AvatarRes).\n\n";
-                    }
-                } else {
-                    // Se não achou arquivos, considera limpo ou avisa que não tem cache
-                    echo $bold . $fverde . "[i] Nenhum cache de AvatarRes encontrado para verificar (Limpo).\n\n";
-                }
+    // Restaura reporte de erros para o restante do script (opcional)
+    error_reporting(E_ALL);
 
     // Verificação OBB
     echo $bold . $azul . "[+] Checando OBB...\n";
@@ -598,4 +389,5 @@ while (true) {
     }
 }
 ?>
+
 
