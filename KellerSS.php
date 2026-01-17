@@ -141,7 +141,7 @@ function simularScan($nomeJogo) {
         
         // Fase Lenta (Do 1 ao 6 / Índices 0 a 5)
         if ($index <= 5) {
-            usleep(500000); // 600ms
+            usleep(500000); // 500ms
             
             // Pausa EXTRA de transição após o stat (Item 6 / Index 5)
             if ($index == 5) {
@@ -150,7 +150,7 @@ function simularScan($nomeJogo) {
         } 
         // Fase Rápida (Do 7 ao 10 / Índices 6 a 9)
         else {
-            usleep(100000);  // 110ms
+            usleep(100000);  // 100ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
@@ -234,12 +234,12 @@ function simularScan($nomeJogo) {
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
-    usleep(50000); 
+    usleep(70000); 
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    usleep(70000);
+    usleep(400000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
@@ -478,4 +478,5 @@ while (true) {
     }
 }
 ?>
+
 
