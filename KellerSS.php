@@ -257,131 +257,6 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-// 5. HOLOGRAMA (TIMER DE 4 MIN + DADOS REAIS + PAUSA FINAL)
-    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
-    
-    // Suprime erros técnicos
-    error_reporting(0);
-
-    // Variáveis de Caminho Fixo (Free Fire Normal)
-    $pacoteFixo = "com.dts.freefireth";
-
-    // --- ETAPA 1: PREPARAÇÃO SILENCIOSA ---
-    // Faz umas leituras em background para 'aquecer' o cache do ADB
-    shell_exec('adb shell ls -t "/sdcard/Android/data/' . $pacoteFixo . '/files/MReplays" > /dev/null 2>&1');
-
-    // --- MENSAGEM 1 (O FALSO POSITIVO) ---
-    echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
-
-    // --- TIMER DE 4 MINUTOS (O "CONGELAMENTO") ---
-    // O script VAI PARAR AQUI por 4 minutos. Não feche, ele está rodando.
-    sleep(240); 
-
-    // --- ETAPA 2: DADOS REAIS DA PASTA SHADERS ---
-    $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
-    
-    // Pega data real
-    $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
-    $dataModifyFormatada = "Não encontrada";
-
-    if (!empty($resultadoPastaShaders)) {
-        preg_match('/Modify: (.*?)\n/', $resultadoPastaShaders, $matchModify);
-        if (!empty($matchModify[1])) {
-            $dataModify = trim($matchModify[1]);
-            $cleanModify = preg_replace('/\.\d+/', '', $dataModify);
-            $tsMod = strtotime($cleanModify);
-            if ($tsMod) $dataModifyFormatada = date("d-m-Y H:i:s", $tsMod);
-        }
-    }
-
-    // Exibe após os 4 minutos
-    echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n";
-    echo $bold . $amarelo . "[*] Data da última modificação: " . $dataModifyFormatada . "\n\n";
-
-    echo $bold . $amarelo . "[*] Data da última alteração na pasta 'gameassetbundles': " . $dataModifyFormatada . "\n";
-    echo $bold . $branco . "[#] Verifique o horário da última alteração, se for após a partida, aplique o W.O!\n\n";
-
-    // --- ETAPA 3: PASTA ANDROID ---
-    $diretorioAndroid = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android"; 
-    echo $bold . $branco . "[+] Verificando datas de modificação na pasta 'android'...\n";
-
-    $statAndroid = shell_exec('adb shell stat ' . escapeshellarg($diretorioAndroid) . ' 2>&1');
-    $dataDisplayAndroid = "Não encontrada";
-
-    if (strpos($statAndroid, 'File:') !== false) {
-        preg_match('/Modify: (\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $statAndroid, $matchModify);
-        if ($matchModify) {
-            $ts = strtotime($matchModify[1]);
-            if ($ts) $dataDisplayAndroid = date("d-m-Y H:i:s", $ts);
-        }
-    }
-    
-    echo $bold . $amarelo . "[i] Modificação da pasta: " . $dataDisplayAndroid . "\n";
-    echo $bold . $branco . "[+] Caso a pasta 'android' esteja modificada após o fim da partida, aplique o W.O!\n\n";
-
-    // --- ETAPA 4: AVATAR RES (VARREDURA REAL) ---
-    $diretorioAvatarRes = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
-    $diretorioOptional = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres";
-
-    // Verifica qual pasta existe
-    $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
-    $diretorioAlvo = (trim((string)$checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptional;
-    
-    // Data da pasta
-    $statAvatar = shell_exec('adb shell stat -c "%y" ' . escapeshellarg($diretorioAlvo) . ' 2>/dev/null');
-    $dataAvatarDisplay = "Não encontrada";
-    if ($statAvatar) {
-        $ts = strtotime(trim($statAvatar));
-        if ($ts) $dataAvatarDisplay = date("d-m-Y H:i:s", $ts);
-    }
-    
-    echo $bold . $amarelo . "[*] Data de modificação na pasta 'gameassetbundles': " . $dataAvatarDisplay . "\n";
-    
-    // Varredura de arquivos
-    $listaArquivos = shell_exec('adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"');
-    $modificacaoDetectada = false;
-
-    if ($listaArquivos !== '') {
-        $arquivos = array_filter(explode("\n", trim($listaArquivos)), 'strlen');
-
-        foreach ($arquivos as $arquivo) {
-            $arquivo = trim($arquivo);
-            if ($arquivo === '') continue;
-
-            $head = shell_exec('adb shell "head -c 20 ' . escapeshellarg($arquivo) . ' 2>/dev/null"');
-            if (strpos($head, "UnityFS") === false) continue;
-
-            $statMod = shell_exec('adb shell stat -c "%y" ' . escapeshellarg($arquivo) . ' 2>/dev/null');
-            $statChg = shell_exec('adb shell stat -c "%z" ' . escapeshellarg($arquivo) . ' 2>/dev/null');
-
-            if ($statMod && $statChg) {
-                if (strtotime(trim($statMod)) != strtotime(trim($statChg))) {
-                     echo $bold . $vermelho . "[!] Modificação em arquivo UnityFS detectada: " . basename($arquivo) . "\n";
-                     $modificacaoDetectada = true;
-                }
-            }
-        }
-    }
-
-    if (!$modificacaoDetectada) {
-        echo $bold . $fverde . "[i] Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
-    }
-
-    // Reativa erros
-    error_reporting(E_ALL);
-    
-    // --- MENSAGENS FINAIS ---
-
-    echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
-
-    echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
-    echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n";
-    
-    // --- PAUSA PARA NÃO LIMPAR A TELA ---
-    // Isso impede que o script volte pro menu instantaneamente
-    echo $bold . $laranja . "[#] Pressione ENTER para voltar ao menu...";
-    fgets(STDIN, 1024);
-}
 
     // Verificação OBB
     echo $bold . $azul . "[+] Checando OBB...\n";
@@ -453,6 +328,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
