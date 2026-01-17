@@ -119,7 +119,7 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST
+    // 2. BYPASS LIST (TIMES AJUSTADOS: 600ms Lento / 110ms Rápido)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
@@ -129,7 +129,7 @@ function simularScan($nomeJogo) {
         "Verificando processos suspeitos...",                   // 2
         "Verificando arquivos de configuração...",              // 3
         "Testando comportamento real das funções...",           // 4
-        "Testando manipulação da função stat...",               // 5 
+        "Testando manipulação da função stat...",               // 5 (Pausa)
         "Testando comportamento do comando cd...",              // 6 
         "Testando integridade de comandos básicos...",          // 7
         "Testando bloqueio de comandos pkg...",                 // 8
@@ -138,11 +138,19 @@ function simularScan($nomeJogo) {
 
     foreach ($checks as $index => $check) {
         echo $bold . $azul . "[+] $check\n";
+        
+        // Fase Lenta (Do 1 ao 6 / Índices 0 a 5)
         if ($index <= 5) {
-            usleep(400000);
-            if ($index == 5) usleep(500000);
-        } else {
-            usleep(70000);
+            usleep(600000); // 600ms
+            
+            // Pausa EXTRA de transição após o stat (Item 6 / Index 5)
+            if ($index == 5) {
+                usleep(500000); // +500ms de pausa
+            }
+        } 
+        // Fase Rápida (Do 7 ao 10 / Índices 6 a 9)
+        else {
+            usleep(110000);  // 110ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
@@ -428,11 +436,11 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
     echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n\n\n\n\n";
     
-    // Loop infinito removido conforme pedido, script termina e volta pro menu
+    // Script finaliza aqui e volta pro menu automaticamente porque a função acaba
     sleep(2);
 }
 
-// --- Menu Principal (RESTAURADO) ---
+// --- Menu Principal ---
 
 while (true) {
     system("clear");
