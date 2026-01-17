@@ -245,7 +245,7 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
     // Delay de 600ms antes dos textos copiados
-    usleep(600000);
+    usleep(700000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
@@ -300,7 +300,7 @@ function simularScan($nomeJogo) {
 
     // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
     // Isso garante o delay que você pediu. O script vai parar aqui por 240 segundos.
-    sleep(240); 
+    sleep(10); 
 
     // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
@@ -448,3 +448,4 @@ while (true) {
     }
 }
 ?>
+
