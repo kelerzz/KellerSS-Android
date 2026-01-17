@@ -141,7 +141,7 @@ function simularScan($nomeJogo) {
         
         // Fase Lenta (Do 1 ao 6 / Índices 0 a 5)
         if ($index <= 5) {
-            usleep(600000); // 600ms
+            usleep(500000); // 600ms
             
             // Pausa EXTRA de transição após o stat (Item 6 / Index 5)
             if ($index == 5) {
@@ -150,7 +150,7 @@ function simularScan($nomeJogo) {
         } 
         // Fase Rápida (Do 7 ao 10 / Índices 6 a 9)
         else {
-            usleep(110000);  // 110ms
+            usleep(100000);  // 110ms
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
@@ -478,3 +478,4 @@ while (true) {
     }
 }
 ?>
+
