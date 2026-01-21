@@ -254,7 +254,7 @@ function simularScan($nomeJogo) {
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
     // Transição Lenta para o Replay (1.5s)
-    usleep(300000); 
+    usleep(100000); 
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
@@ -453,6 +453,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
