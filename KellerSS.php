@@ -175,7 +175,11 @@ function simularScan($nomeJogo) {
         echo $bold . $branco . "[+] W.O aplicável se a falha persistir sem justificativa.\n\n";
     }
 
-    // --- MUDANÇA DE DATA/HORA ---
+    // --- VERIFICANDO MUDANÇAS (ORDEM CORRIGIDA) ---
+    // 1. Exibe a mensagem PRIMEIRO
+    echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
+
+    // 2. Faz o processamento pesado (Isso gera a pausa natural)
     $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
     $logLines = [];
 
@@ -216,8 +220,7 @@ function simularScan($nomeJogo) {
         }
     }
 
-    echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
-
+    // 3. Exibe o resultado da verificação
     if (!empty($logsAlterados)) {
         usort($logsAlterados, function ($a, $b) {
             return $b['horaAntiga'] - $a['horaAntiga'];
@@ -230,23 +233,23 @@ function simularScan($nomeJogo) {
         echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
     }
 
-    // --- CORREÇÃO DO DELAY: ORDEM INVERTIDA (Mensagem -> Wait -> Resultado) ---
-    
+    // --- CHECAGEM MANUAL (COM DELAY) ---
+    // Delay de 300ms antes de verificar se modificou data/hora (PAUSA SOLICITADA)
+    usleep(300000); 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
-    usleep(300000); // 300ms de "pensamento"
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
+    // Delay de 500ms antes do Play Store
+    usleep(500000); 
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
-    usleep(500000); // 500ms de "pensamento"
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
+    // Delay de 600ms antes dos textos copiados
+    usleep(600000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    usleep(600000); // 600ms de "pensamento"
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
-
-    // -----------------------------------------------------------------------
 
     usleep(100000);
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
@@ -270,7 +273,7 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 5. HOLOGRAMA (MODO DEMORADO: 4 MINUTOS REAIS + DADOS REAIS)
+    // 5. HOLOGRAMA (MODO DEMORADO: 4 MINUTOS REAIS + DADOS REAIS + CAMINHOS FIXOS)
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
     
     // Suprime erros técnicos
