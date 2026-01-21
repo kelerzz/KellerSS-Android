@@ -234,7 +234,8 @@ function simularScan($nomeJogo) {
     }
 
     // --- CHECAGEM MANUAL (COM DELAY) ---
-    // Delay de 300ms antes de verificar se modificou data/hora (PAUSA SOLICITADA)
+    
+    // Delay de 300ms antes de verificar se modificou data/hora
     usleep(300000); 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
@@ -246,12 +247,14 @@ function simularScan($nomeJogo) {
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    // Delay de 600ms antes dos textos copiados
-    usleep(600000);
+    // --- AQUI ESTAVA O PROBLEMA: AUMENTADO PARA 2 SEGUNDOS ---
+    usleep(500000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
+    usleep(2000000); // 2 Segundos de processamento visual
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
-    usleep(100000);
+    // Transição Lenta para o Replay (1.5s)
+    usleep(1500000); 
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
@@ -302,7 +305,7 @@ function simularScan($nomeJogo) {
 
     // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
     // Isso garante o delay que você pediu. O script vai parar aqui por 240 segundos.
-    sleep(5); 
+    sleep(6); 
 
     // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
