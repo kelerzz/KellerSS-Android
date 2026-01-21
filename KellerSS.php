@@ -248,9 +248,8 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
     // --- AQUI ESTAVA O PROBLEMA: AUMENTADO PARA 2 SEGUNDOS ---
-    usleep(500000);
+    usleep(700000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    usleep(2000000); // 2 Segundos de processamento visual
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
     // Transição Lenta para o Replay (1.5s)
@@ -453,3 +452,4 @@ while (true) {
     }
 }
 ?>
+
