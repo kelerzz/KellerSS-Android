@@ -104,7 +104,7 @@ function simularScan($nomeJogo) {
     keller_banner();
 
     // --- ATRASO DE INICIALIZAÇÃO (SIMULAÇÃO DE CARREGAMENTO) ---
-    usleep(700000); // 0.3 segundos de delay antes de começar a falar
+    usleep(700000); // 0.7 segundos de delay antes de começar a falar
 
     // 1. Início
     echo $bold . $azul . "[+] Versão do Android: 13\n";
@@ -253,7 +253,7 @@ function simularScan($nomeJogo) {
     // Delay de 1.5s antes dos textos copiados (ajustado para ser rápido mas visível)
     usleep(1500000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    usleep(1500000);
+    usleep(2000000); // 2 segundos
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
     
@@ -306,8 +306,8 @@ function simularScan($nomeJogo) {
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
     // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
-    // Isso garante o delay que você pediu. O script vai parar aqui por 240 segundos.
-    sleep(240); 
+    // Isso garante o delay que você pediu. O script vai parar aqui por 6 segundos (seu código).
+    sleep(6); 
 
     // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
@@ -414,7 +414,12 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
     echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n\n\n\n\n";
     
-    sleep(2);
+    // --- PONTO DE PARADA DEFINITIVO ---
+    // Trava o script aqui. Não retorna ao menu (while loop), não limpa a tela.
+    // O usuário vê os resultados e quando quiser, fecha o Termux ou aperta Ctrl+C.
+    inputusuario("Pressione Enter para encerrar");
+    fgets(STDIN, 1024);
+    exit(0); 
 }
 
 // --- Menu Principal ---
@@ -455,4 +460,3 @@ while (true) {
     }
 }
 ?>
-
