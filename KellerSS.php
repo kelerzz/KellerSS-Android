@@ -104,7 +104,7 @@ function simularScan($nomeJogo) {
     keller_banner();
 
     // --- ATRASO DE INICIALIZAÇÃO ---
-    usleep(700000); // 0.7 segundos
+    usleep(700000); 
 
     // 1. Início
     echo $bold . $azul . "[+] Versão do Android: 13\n";
@@ -266,20 +266,18 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
-    // 5. HOLOGRAMA (MODO DEMORADO: 4 MINUTOS REAIS + DADOS REAIS + CAMINHOS FIXOS)
+    // 5. HOLOGRAMA
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
     
-    // Suprime erros técnicos
     error_reporting(0);
 
-    // Variáveis de Caminho Fixo (Free Fire Normal)
+    // Variáveis de Caminho Fixo
     $pacoteFixo = "com.dts.freefireth";
 
-    // --- ETAPA 1: VERIFICAÇÃO INICIAL (ARQUIVOS .BIN e PASTAS) ---
+    // --- ETAPA 1: VERIFICAÇÃO INICIAL ---
     $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacoteFixo . '/files/MReplays" | grep "\.bin$" | head -n 1';
     $arquivoBinMaisRecente = shell_exec($comandoFindBin);
     
-    // Processamento "invisível" para garantir que o ADB está acordado
     $pastasCache = [
         "/sdcard/Android/data/$pacoteFixo/files/contentcache",
         "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android"
@@ -288,16 +286,14 @@ function simularScan($nomeJogo) {
         shell_exec('adb shell stat ' . escapeshellarg($p) . ' 2>&1');
     }
 
-    // --- MENSAGEM 1 ---
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
-    // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
-    sleep(6); // Timer de 6 segundos conforme seu último ajuste (se quiser 4 minutos, mude para 240)
+    // --- TIMER 6 SEGUNDOS ---
+    sleep(6);
 
-    // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
+    // --- ETAPA 2: PASTA SHADERS ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
     
-    // Executa o stat real
     $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
     $dataModifyFormatada = "Não encontrada";
 
@@ -311,14 +307,13 @@ function simularScan($nomeJogo) {
         }
     }
 
-    // --- MENSAGEM 2 (DADOS REAIS DA PASTA) ---
     echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n";
     echo $bold . $amarelo . "[*] Data da última modificação: " . $dataModifyFormatada . "\n\n";
 
     echo $bold . $amarelo . "[*] Data da última alteração na pasta 'gameassetbundles': " . $dataModifyFormatada . "\n";
     echo $bold . $branco . "[#] Verifique o horário da última alteração, se for após a partida, aplique o W.O!\n\n";
 
-    // --- ETAPA 3: PASTA ANDROID (DADOS REAIS) ---
+    // --- ETAPA 3: PASTA ANDROID ---
     $diretorioAndroid = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android"; 
     echo $bold . $branco . "[+] Verificando datas de modificação na pasta 'android'...\n";
 
@@ -336,15 +331,13 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[i] Modificação da pasta: " . $dataDisplayAndroid . "\n";
     echo $bold . $branco . "[+] Caso a pasta 'android' esteja modificada após o fim da partida, aplique o W.O!\n\n";
 
-    // --- ETAPA 4: AVATAR RES e UNITYFS (VARREDURA REAL ARQUIVO POR ARQUIVO) ---
+    // --- ETAPA 4: AVATAR RES e UNITYFS ---
     $diretorioAvatarRes = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
     $diretorioOptional = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres";
 
-    // Verifica qual pasta existe
     $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
     $diretorioAlvo = (trim((string)$checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptional;
     
-    // Data da pasta
     $statAvatar = shell_exec('adb shell stat -c "%y" ' . escapeshellarg($diretorioAlvo) . ' 2>/dev/null');
     $dataAvatarDisplay = "Não encontrada";
     if ($statAvatar) {
@@ -354,7 +347,6 @@ function simularScan($nomeJogo) {
     
     echo $bold . $amarelo . "[*] Data de modificação na pasta 'gameassetbundles': " . $dataAvatarDisplay . "\n";
     
-    // Varredura pesada (Arquivo por arquivo)
     $listaArquivos = shell_exec('adb shell "find ' . escapeshellarg($diretorioAlvo) . ' -type f 2>/dev/null"');
     $modificacaoDetectada = false;
 
@@ -384,7 +376,7 @@ function simularScan($nomeJogo) {
         echo $bold . $fverde . "[i] Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
     }
 
-    // --- CHECAGEM OBB (INSERIDA AQUI) ---
+    // --- CHECAGEM OBB ---
     echo $bold . $azul . "[+] Checando OBB...\n";
 
     $diretorioObb = "/sdcard/Android/obb/com.dts.freefireth";
@@ -412,15 +404,14 @@ function simularScan($nomeJogo) {
         echo $vermelho . "[*] OBB deletada e/ou inexistente!\n";
     }
 
-    // Reativa erros
     error_reporting(E_ALL);
     
     // --- MENSAGENS FINAIS E ENCERRAMENTO AUTOMÁTICO ---
 
     echo $bold . $branco . "\n[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
-    echo $bold . $branco . "\n\n\t DDD.\n";
-    echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n\n\n\n\n";
+    echo $bold . $branco . "\n\n\t\tObrigado por compactuar por um cenário limpo de cheats.\n";
+    echo $bold . $branco . "\t\t\t\tCom carinho, Keller...\n\n\n\n";
     
     // Finaliza automaticamente sem limpar a tela
     exit(0);
