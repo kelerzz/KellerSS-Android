@@ -103,6 +103,9 @@ function simularScan($nomeJogo) {
     system("clear");
     keller_banner();
 
+    // --- ATRASO DE INICIALIZAÇÃO (SIMULAÇÃO DE CARREGAMENTO) ---
+    usleep(300000); // 0.3 segundos de delay antes de começar a falar
+
     // 1. Início
     echo $bold . $azul . "[+] Versão do Android: 13\n";
     usleep(100000); 
@@ -119,7 +122,7 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
-    // 2. BYPASS LIST (TIMES AJUSTADOS: 500ms Lento / 100ms Rápido)
+    // 2. BYPASS LIST (SEUS TEMPOS: 500ms Lento / 100ms Rápido)
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
@@ -247,8 +250,8 @@ function simularScan($nomeJogo) {
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    // --- AQUI ESTAVA O PROBLEMA: AUMENTADO PARA 2 SEGUNDOS ---
-    usleep(100000);
+    // Delay de 1.5s antes dos textos copiados (ajustado para ser rápido mas visível)
+    usleep(1500000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
     usleep(1500000);
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
@@ -304,7 +307,7 @@ function simularScan($nomeJogo) {
 
     // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
     // Isso garante o delay que você pediu. O script vai parar aqui por 240 segundos.
-    sleep(6); 
+    sleep(240); 
 
     // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
@@ -452,11 +455,3 @@ while (true) {
     }
 }
 ?>
-
-
-
-
-
-
-
-
