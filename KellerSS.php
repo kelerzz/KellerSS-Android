@@ -230,24 +230,23 @@ function simularScan($nomeJogo) {
         echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
     }
 
-    // --- CORREÇÃO DO DELAY INSTANTÂNEO ---
+    // --- CORREÇÃO DO DELAY: ORDEM INVERTIDA (Mensagem -> Wait -> Resultado) ---
     
-    // Delay de 300ms antes de verificar se modificou data/hora
-    usleep(300000); 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
+    usleep(300000); // 300ms de "pensamento"
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
     echo $bold . $branco . "[+] Caso haja mudança de horário durante/após a partida, aplique o W.O!\n\n";
 
-    // Delay de 500ms antes do Play Store
-    usleep(500000); 
     echo $bold . $azul . "[+] Obtendo os últimos acessos do Google Play Store...\n";
+    usleep(500000); // 500ms de "pensamento"
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n";
     echo $bold . $branco . "[+] Caso haja acesso durante/após a partida, aplique o W.O!\n\n";
 
-    // Delay de 600ms antes dos textos copiados
-    usleep(700000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
+    usleep(600000); // 600ms de "pensamento"
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
+
+    // -----------------------------------------------------------------------
 
     usleep(100000);
     echo $bold . $azul . "[+] Checando se o replay foi passado...\n";
@@ -300,7 +299,7 @@ function simularScan($nomeJogo) {
 
     // --- O TIMER DE 4 MINUTOS (O "CONGELAMENTO" PROPOSITAL) ---
     // Isso garante o delay que você pediu. O script vai parar aqui por 240 segundos.
-    sleep(10); 
+    sleep(5); 
 
     // --- ETAPA 2: RECUPERAR DATA REAL DA PASTA SHADERS APÓS O TEMPO ---
     $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
@@ -448,4 +447,3 @@ while (true) {
     }
 }
 ?>
-
