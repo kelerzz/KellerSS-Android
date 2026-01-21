@@ -104,7 +104,7 @@ function simularScan($nomeJogo) {
     keller_banner();
 
     // --- ATRASO DE INICIALIZAÇÃO (SIMULAÇÃO DE CARREGAMENTO) ---
-    usleep(300000); // 0.3 segundos de delay antes de começar a falar
+    usleep(700000); // 0.3 segundos de delay antes de começar a falar
 
     // 1. Início
     echo $bold . $azul . "[+] Versão do Android: 13\n";
@@ -455,3 +455,4 @@ while (true) {
     }
 }
 ?>
+
