@@ -250,7 +250,7 @@ function simularScan($nomeJogo) {
     // --- AQUI ESTAVA O PROBLEMA: AUMENTADO PARA 2 SEGUNDOS ---
     usleep(100000);
     echo $bold . $azul . "[+] Obtendo os últimos textos copiados...\n";
-    usleep(1000000);
+    usleep(1500000);
     echo $bold . $vermelho . "[!] Nenhum dado encontrado.\n\n";
 
     // Transição Lenta para o Replay (1.5s)
@@ -453,6 +453,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
