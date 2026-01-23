@@ -65,7 +65,7 @@ function conectarADBReal() {
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
-        echo $bold . $amarelo . "\n[!] Digite o código de pareamento do Wifi Debugging:\n" . $cln;
+        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
         system("adb pair localhost:" . $pair_port);
     } 
 
@@ -73,8 +73,6 @@ function conectarADBReal() {
     echo "\n";
     inputusuario("Qual a sua porta para a conexão (ex: 12345)?");
     $connect_port = trim(fgets(STDIN, 1024));
-    
-    system("clear"); // Limpa a tela para mostrar apenas o resultado final como na imagem
     
     if (!empty($connect_port) && is_numeric($connect_port)) {
         // 1. Mensagem Amarela
@@ -132,9 +130,6 @@ function simularScan($nomeJogo) {
         echo $bold . $vermelho . "[!] O $nomeExibicao está desinstalado, cancelando a telagem...\n\n" . $cln;
         exit;
     }
-    // --------------------------------------
-
-    echo $bold . $fverde . "[i] Jogo encontrado no dispositivo.\n\n";
 
     // --- ATRASO DE INICIALIZAÇÃO ---
     usleep(700000); 
@@ -490,3 +485,4 @@ while (true) {
     }
 }
 ?>
+
