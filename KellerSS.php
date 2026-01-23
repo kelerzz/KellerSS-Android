@@ -16,26 +16,23 @@ $bold       = "\e[1m";
 // --- Funções Auxiliares ---
 
 function keller_banner(){
-    global $vermelho, $branco, $lazul, $bold, $cln;
-    // Cabeçalho
-    echo "\n\e[37m           KellerSS Android\e[36m Fucking Cheaters\e[37m discord.gg/allianceoficial\n";
-    
-    // ASCII ART EM VERMELHO (Como no print)
-    echo $vermelho . $bold . "
-                            )        (       (           (      
-                ( /(        )\ )  )\ )        )\ )  
+  echo "\e[37m
+           KellerSS Android\e[36m Fucking Cheaters\e[91m\e[37m discord.gg/allianceoficial\e[91m
+            
+                            )       (     (          (     
+                        ( /(       )\ )  )\ )       )\ )  
                         )\()) (   (()/( (()/(  (   (()/(  
-                        |((_)\  )\  
-   /(_)) /(_)) )\   /(_)) 
+                        |((_)\  )\   /(_)) /(_)) )\   /(_)) 
                         |_ ((_)((_) (_))  (_))  ((_) (_))   
                         | |/ / | __|| |   | |   | __|| _ \  
-                  
-        ' <  | _| | |__ | |__ | _| |   /  
+                        ' <  | _| | |__ | |__ | _| |   /  
                         _|\_\ |___||____||____||___||_|_\  
-" . $cln;
 
-    // Créditos em Ciano (Abaixo do banner)
-    echo "\n                    \e[36m{C} Coded By - KellerSS | Credits for Sheik\n\n";
+
+
+                    \e[36m{C} Coded By - KellerSS | Credits for Sheik                                   
+\e[32m
+  \n";
 }
 
 function inputusuario($message){
@@ -482,3 +479,4 @@ while (true) {
     }
 }
 ?>
+
