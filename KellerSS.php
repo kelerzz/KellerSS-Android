@@ -439,10 +439,10 @@ function simularScan($nomeJogo) {
     
     // --- MENSAGENS FINAIS E ENCERRAMENTO AUTOMÁTICO ---
 
-    echo $bold . $branco . "\n[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
+    echo $bold . $branco . "[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
-    echo $bold . $branco . "\n\n\t\tObrigado por compactuar por um cenário limpo de cheats.\n";
-    echo $bold . $branco . "\t\t\t\tCom carinho, Keller...\n\n\n\n";
+    echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
+    echo $bold . $branco . "\t                 Com carinho, Keller...\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
     
     // Finaliza automaticamente sem limpar a tela
     exit(0);
@@ -491,6 +491,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
