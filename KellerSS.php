@@ -1,4 +1,4 @@
-<?php
+  <?php
 
 // --- Configurações de Cores ---
 $branco     = "\e[97m";
@@ -44,30 +44,33 @@ function processando($tempo = 1) {
     usleep($tempo * 1000000); 
 }
 
-// --- Lógica REAL do ADB (MODIFICADA) ---
+// --- Lógica REAL do ADB ---
 function conectarADBReal() {
     global $bold, $azul, $cln, $amarelo, $fverde, $vermelho, $branco;
     
     system("clear");
     keller_banner();
     
-    // Verificação silenciosa ou mínima se necessário, 
-    // mas para ficar igual a imagem, vamos direto aos inputs.
+    echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
-    echo $bold . $azul . "[+] Verificando ADB...\n" . $cln;
     if (!shell_exec("adb version > /dev/null 2>&1")) {
-        echo $bold . $amarelo . "[!] ADB não encontrado. Instalando...\n" . $cln;
+        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
+        echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
+    } else {
+        echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
     }
 
-    // --- PAREAMENTO (Mantido conforme lógica original, mas limpo) ---
+    // --- PAREAMENTO ---
     inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
         echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
         system("adb pair localhost:" . $pair_port);
-    } 
+    } elseif (!empty($pair_port)) {
+        echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
+    }
 
     // --- CONEXÃO (AQUI ESTÁ A ALTERAÇÃO PRINCIPAL) ---
     echo "\n";
@@ -485,4 +488,5 @@ while (true) {
     }
 }
 ?>
+
 
