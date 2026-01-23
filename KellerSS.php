@@ -62,7 +62,7 @@ function conectarADBReal() {
     }
 
     // --- PAREAMENTO ---
-    inputusuario("Qual a sua porta para o pareamento (ex: 45678)? [Enter p/ pular]");
+    inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
@@ -455,3 +455,4 @@ while (true) {
     }
 }
 ?>
+
