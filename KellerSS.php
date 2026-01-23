@@ -66,7 +66,7 @@ function conectarADBReal() {
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
-        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
+        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento que aparece no seu celular e pressione Enter.\n" . $cln;
         system("adb pair localhost:" . $pair_port);
     } elseif (!empty($pair_port)) {
         echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
@@ -488,6 +488,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
