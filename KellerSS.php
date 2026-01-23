@@ -449,10 +449,9 @@ while (true) {
 
     echo $bold . $azul . "
       +--------------------------------------------------------------+
-      +                                                              +
-      +                           KellerSS Menu                      +
-      +                                                              +
+      +                       KellerSS Menu                          +
       +--------------------------------------------------------------+
+      
       \n\n";
     
     echo $amarelo . " [0]  Conectar ADB$branco (Pareamento e conexão via ADB)$fverde \n [1]  Escanear FreeFire Normal \n$fverde [2]  Escanear FreeFire Max \n {$vermelho}[S]  Sair \n\n" . $cln;
@@ -479,4 +478,5 @@ while (true) {
     }
 }
 ?>
+
 
