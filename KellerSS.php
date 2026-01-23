@@ -37,7 +37,6 @@ function keller_banner(){
 
 function inputusuario($message){
   global $cln, $bold, $lazul, $fverde;
-  // O final $fverde garante que o que o usuário digitar fique verde
   echo $cln . $bold . $lazul . "[#] " . $message . ": " . $fverde;
 }
 
@@ -45,38 +44,32 @@ function processando($tempo = 1) {
     usleep($tempo * 1000000); 
 }
 
-// --- Lógica REAL do ADB (Modificada para igualar ao print) ---
+// --- Lógica REAL do ADB ---
 function conectarADBReal() {
     global $bold, $azul, $cln, $amarelo, $fverde, $vermelho, $branco;
     
-    // Limpa a tela e mostra banner (padrão)
     system("clear");
     keller_banner();
     
-    // CORREÇÃO: Força a cor branca aqui para que o output do 'pkg install' não fique verde por causa do banner
-    echo $branco; 
+    echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
-    // Instalação do Tools (Gera o output 'Upgrading/Installing' do topo da imagem)
     if (!shell_exec("adb version > /dev/null 2>&1")) {
+        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
         echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
     } else {
-        // Se já tiver instalado, apenas exibe a mensagem para ficar igual ao print
-        echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
+        echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
     }
 
     // --- PAREAMENTO ---
     inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
     $pair_port = trim(fgets(STDIN, 1024));
 
-    echo "\n"; // Espaço igual ao print
-
     if (!empty($pair_port) && is_numeric($pair_port)) {
-        echo $bold . $amarelo . "[!] Agora, digite o código de pareamento que aparece no seu celular e pressione Enter.\n" . $cln;
-        // O comando abaixo gera o "Enter pairing code:" nativo do ADB
+        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
         system("adb pair localhost:" . $pair_port);
     } elseif (!empty($pair_port)) {
-        echo $bold . $vermelho . "[!] Porta inválida! Pulando pareamento.\n" . $cln;
+        echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
     }
 
     // --- CONEXÃO ---
@@ -84,33 +77,30 @@ function conectarADBReal() {
     inputusuario("Qual a sua porta para a conexão (ex: 12345)?");
     $connect_port = trim(fgets(STDIN, 1024));
     
-    echo "\n"; // Espaço antes do "Conectando..."
-
     if (!empty($connect_port) && is_numeric($connect_port)) {
-        echo $bold . $amarelo . "[!] Conectando ao dispositivo...\n" . $cln;
-        // O comando abaixo gera o "connected to localhost:XXXXX" nativo do ADB
+        echo $bold . $amarelo . "\n[!] Conectando ao dispositivo...\n" . $cln;
         system("adb connect localhost:" . $connect_port);
         
-        // MENSAGEM FINAL IGUAL AO PRINT (Sem listar devices)
-        echo "\n" . $bold . $fverde . "[i] Processo de conexão finalizado. Verifique a saída acima para ver se a conexão foi bem-sucedida.\n" . $cln;
-
+        echo $bold . $azul . "\n[+] Verificando lista de dispositivos conectados:\n" . $cln;
+        system("adb devices"); 
+        
+        echo $bold . $fverde . "\n[i] Processo de conexão finalizado.\n" . $cln;
     } else {
-        echo $bold . $vermelho . "[!] Porta inválida!\n" . $cln;
+        echo $bold . $vermelho . "\n[!] Porta inválida!\n" . $cln;
     }
     
-    // INPUT FINAL EM BRANCO
     echo $bold . $branco . "\n[+] Pressione Enter para voltar ao menu...\n" . $cln;
-    // Captura o enter. O cursor fica lá esperando igual na imagem (bloco branco)
     fgets(STDIN, 1024);
 }
 
-// --- Lógica do Scanner (Mantida igual ao pedido anterior) ---
+// --- Lógica do Scanner ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
 
+    // Configuração Dinâmica baseada no jogo escolhido
     if ($nomeJogo == "FreeFire Max") {
         $pacote = "com.dts.freefiremax";
-        $nomeExibicao = "FreeFire MAX"; 
+        $nomeExibicao = "FreeFire MAX"; // Exatamente como no print
     } else {
         $pacote = "com.dts.freefireth";
         $nomeExibicao = "FreeFire";
@@ -119,21 +109,28 @@ function simularScan($nomeJogo) {
     system("clear");
     keller_banner(); 
 
-    // Lógica "quebrada" solicitada (Check Connection + Check Install)
+    // --- VERIFICAÇÃO COM A LÓGICA DO PRINT ---
     $checkInstall = shell_exec("adb shell pm path $pacote 2>&1");
     
     if (empty(trim($checkInstall)) || strpos($checkInstall, 'package:') === false) {
+        
+        // Simula a mensagem verde do ADB se for erro de conexão
         if (strpos($checkInstall, 'no devices') !== false || empty(trim(shell_exec("adb devices | grep device")))) {
             echo "\e[32madb: no devices/emulators found\e[0m\n"; 
         }
+
+        // MENSAGEM DE ERRO DINÂMICA (Muda o nome do jogo aqui)
         echo $bold . $vermelho . "[!] O $nomeExibicao está desinstalado, cancelando a telagem...\n\n" . $cln;
         exit;
     }
+    // --------------------------------------
 
     echo $bold . $fverde . "[i] Jogo encontrado no dispositivo.\n\n";
 
+    // --- ATRASO DE INICIALIZAÇÃO ---
     usleep(700000); 
 
+    // 1. Início (Mantendo o Android 13 fixo mentiroso)
     echo $bold . $azul . "[+] Versão do Android: 13\n";
     usleep(100000); 
     
@@ -149,37 +146,45 @@ function simularScan($nomeJogo) {
     usleep(100000);
     echo $bold . $fverde . "[i] Sessões desnecessárias finalizadas.\n\n";
 
+    // 2. BYPASS LIST
     echo $bold . $azul . "[+] Verificando bypasses de funções shell...\n";
     usleep(50000); 
     
     $checks = [
-        "Verificando funções maliciosas no ambiente shell...",
-        "Testando acesso a diretórios críticos...",
-        "Verificando processos suspeitos...",
-        "Verificando arquivos de configuração...",
-        "Testando comportamento real das funções...",
-        "Testando manipulação da função stat...",
-        "Testando comportamento do comando cd...",
-        "Testando integridade de comandos básicos...",
-        "Testando bloqueio de comandos pkg...",
-        "Verificando arquivos de bypass no dispositivo..."
+        "Verificando funções maliciosas no ambiente shell...",    // 0
+        "Testando acesso a diretórios críticos...",             // 1
+        "Verificando processos suspeitos...",                   // 2
+        "Verificando arquivos de configuração...",              // 3
+        "Testando comportamento real das funções...",           // 4
+        "Testando manipulação da função stat...",               // 5 (Pausa)
+        "Testando comportamento do comando cd...",              // 6 
+        "Testando integridade de comandos básicos...",          // 7
+        "Testando bloqueio de comandos pkg...",                 // 8
+        "Verificando arquivos de bypass no dispositivo..."      // 9
     ];
 
     foreach ($checks as $index => $check) {
         echo $bold . $azul . "[+] $check\n";
+        
+        // Fase Lenta
         if ($index <= 5) {
             usleep(500000); 
             if ($index == 5) usleep(500000);
-        } else {
+        } 
+        // Fase Rápida
+        else {
             usleep(100000); 
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
 
+    // 3. REINÍCIO
     echo $bold . $azul . "[+] Checando se o dispositivo foi reiniciado recentemente...\n";
+    $uptime = shell_exec("adb shell uptime"); 
     usleep(100000); 
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
+    // --- IMPLEMENTAÇÃO LOGCAT REAL ---
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
@@ -193,10 +198,12 @@ function simularScan($nomeJogo) {
         echo $bold . $branco . "[+] W.O aplicável se a falha persistir sem justificativa.\n\n";
     }
 
+    // --- VERIFICANDO MUDANÇAS ---
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
 
     $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
     $logLines = [];
+
     if ($logcatOutput !== null && trim($logcatOutput) !== "") {
         $logLines = explode("\n", trim($logcatOutput));
     }
@@ -246,6 +253,7 @@ function simularScan($nomeJogo) {
         echo $bold . $vermelho . "[!] Nenhum log de alteração de horário encontrado.\n\n";
     }
 
+    // --- CHECAGEM MANUAL ---
     usleep(300000); 
     echo $bold . $azul . "[+] Checando se modificou data e hora...\n";
     echo $bold . $fverde . "[i] Data e hora/fuso horário automático estão ativados.\n";
@@ -265,6 +273,7 @@ function simularScan($nomeJogo) {
     processando(2.0); 
     echo $bold . $fverde . "[i] Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
+    // --- DATAS (219 segundos) ---
     $cmdInstall = "adb shell dumpsys package $pacote | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
 
@@ -281,9 +290,12 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[+] Data de instalação do jogo: $dateInstall\n";
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays.\n\n";
 
+    // 5. HOLOGRAMA
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma ($nomeExibicao)...\n";
+    
     error_reporting(0);
 
+    // --- ETAPA 1: VERIFICAÇÃO INICIAL ---
     $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacote . '/files/MReplays" | grep "\.bin$" | head -n 1';
     $arquivoBinMaisRecente = shell_exec($comandoFindBin);
     
@@ -296,9 +308,13 @@ function simularScan($nomeJogo) {
     }
 
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
+
+    // --- TIMER 6 SEGUNDOS ---
     sleep(6);
 
+    // --- ETAPA 2: PASTA SHADERS ---
     $pastaShaders = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles";
+    
     $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
     $dataModifyFormatada = "Não encontrada";
 
@@ -314,9 +330,11 @@ function simularScan($nomeJogo) {
 
     echo $bold . $fverde . "[i] Pasta shaders sem alterações suspeitas.\n";
     echo $bold . $amarelo . "[*] Data da última modificação: " . $dataModifyFormatada . "\n\n";
+
     echo $bold . $amarelo . "[*] Data da última alteração na pasta 'gameassetbundles': " . $dataModifyFormatada . "\n";
     echo $bold . $branco . "[#] Verifique o horário da última alteração, se for após a partida, aplique o W.O!\n\n";
 
+    // --- ETAPA 3: PASTA ANDROID ---
     $diretorioAndroid = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android"; 
     echo $bold . $branco . "[+] Verificando datas de modificação na pasta 'android'...\n";
 
@@ -334,6 +352,7 @@ function simularScan($nomeJogo) {
     echo $bold . $amarelo . "[i] Modificação da pasta: " . $dataDisplayAndroid . "\n";
     echo $bold . $branco . "[+] Caso a pasta 'android' esteja modificada após o fim da partida, aplique o W.O!\n\n";
 
+    // --- ETAPA 4: AVATAR RES e UNITYFS ---
     $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
     $diretorioOptional = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
 
@@ -354,6 +373,7 @@ function simularScan($nomeJogo) {
 
     if ($listaArquivos !== '') {
         $arquivos = array_filter(explode("\n", trim($listaArquivos)), 'strlen');
+
         foreach ($arquivos as $arquivo) {
             $arquivo = trim($arquivo);
             if ($arquivo === '') continue;
@@ -377,13 +397,16 @@ function simularScan($nomeJogo) {
         echo $bold . $fverde . "[i] Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
     }
 
+    // --- CHECAGEM OBB ---
     echo $bold . $azul . "[+] Checando OBB...\n";
+
     $diretorioObb = "/sdcard/Android/obb/$pacote";
     $comandoObb = 'adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"';
     $resultadoObb = shell_exec($comandoObb);
 
     if (!empty($resultadoObb)) {
         $arquivosObb = explode("\n", trim($resultadoObb));
+
         foreach ($arquivosObb as $arquivo) {
             if (empty($arquivo)) continue;
             $comandoDataChange = 'adb shell stat -c "%z" ' . escapeshellarg($arquivo) . ' 2>/dev/null';
@@ -392,6 +415,7 @@ function simularScan($nomeJogo) {
             if (!empty($resultadoDataChange)) {
                 $dataChange = new DateTime(trim($resultadoDataChange ?? ""), new DateTimeZone('UTC'));
                 $dataChange->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+
                 echo $amarelo . "[*] Data de modificação do arquivo OBB: " . $dataChange->format("d-m-Y H:i:s") . "\n";
             } else {
                 echo $vermelho . "[!] Não foi possível obter a data de modificação do arquivo OBB.\n";
@@ -402,18 +426,30 @@ function simularScan($nomeJogo) {
     }
 
     error_reporting(E_ALL);
+    
+    // --- MENSAGENS FINAIS E ENCERRAMENTO AUTOMÁTICO ---
+
     echo $bold . $branco . "\n[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
+
     echo $bold . $branco . "\n\n\t\tObrigado por compactuar por um cenário limpo de cheats.\n";
     echo $bold . $branco . "\t\t\t\tCom carinho, Keller...\n\n\n\n";
+    
+    // Finaliza automaticamente sem limpar a tela
     exit(0);
 }
 
 // --- Menu Principal ---
+
 while (true) {
     system("clear");
     keller_banner();
+    
+    // --- ATRASO ADICIONADO AQUI ---
     sleep(5); 
+    // -----------------------------
+    
     echo "\n";
+
     echo $bold . $azul . "
       +--------------------------------------------------------------+
       +                       KellerSS Menu                          +
