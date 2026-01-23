@@ -16,9 +16,12 @@ $bold       = "\e[1m";
 // --- Funções Auxiliares ---
 
 function keller_banner(){
-  echo "\e[37m
-           KellerSS Android\e[36m Fucking Cheaters\e[91m\e[37m discord.gg/allianceoficial\e[91m
-            
+    global $vermelho, $branco, $lazul, $bold, $cln;
+    // Cabeçalho
+    echo "\n\e[37m           KellerSS Android\e[36m Fucking Cheaters\e[37m discord.gg/allianceoficial\n";
+    
+    // ASCII ART EM VERMELHO (Como no print)
+    echo $vermelho . $bold . "
                             )        (       (           (      
                 ( /(        )\ )  )\ )        )\ )  
                         )\()) (   (()/( (()/(  (   (()/(  
@@ -29,11 +32,10 @@ function keller_banner(){
                   
         ' <  | _| | |__ | |__ | _| |   /  
                         _|\_\ |___||____||____||___||_|_\  
+" . $cln;
 
-                    \e[36m{C} Coded By - KellerSS | Credits for Sheik                      
-              
-\e[32m
-  \n";
+    // Créditos em Ciano (Abaixo do banner)
+    echo "\n                    \e[36m{C} Coded By - KellerSS | Credits for Sheik\n\n";
 }
 
 function inputusuario($message){
@@ -94,7 +96,7 @@ function conectarADBReal() {
     fgets(STDIN, 1024);
 }
 
-// --- Lógica FAKE do Scanner (Timings Precisos) ---
+// --- Lógica do Scanner ---
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
 
@@ -102,19 +104,27 @@ function simularScan($nomeJogo) {
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
 
     system("clear");
-    keller_banner();
+    keller_banner(); // Mostra o banner vermelho igual ao print
 
-    // --- NOVA VERIFICAÇÃO DE INSTALAÇÃO ---
-    echo $bold . $azul . "[+] Verificando se o $nomeJogo está instalado...\n";
-    // Usamos 'pm path' para ver se o pacote existe no sistema
-    $checkInstall = shell_exec("adb shell pm path $pacote");
+    // --- VERIFICAÇÃO IDÊNTICA AO PRINT ---
+    // Tenta pegar o path do jogo. O "2>&1" redireciona erros do ADB para a saída
+    $checkInstall = shell_exec("adb shell pm path $pacote 2>&1");
     
+    // Se a saída estiver vazia (não achou o jogo) OU contiver "no devices/emulators"
     if (empty(trim($checkInstall)) || strpos($checkInstall, 'package:') === false) {
-        echo $bold . $vermelho . "[!] O FreeFire está desinstalado, cancelando a telagem...\n\n";
+        
+        // Simula a mensagem verde do ADB se for erro de conexão (igual ao seu print)
+        if (strpos($checkInstall, 'no devices') !== false || empty(trim(shell_exec("adb devices | grep device")))) {
+            echo "\e[32madb: no devices/emulators found\e[0m\n"; 
+        }
+
+        // MENSAGEM DE ERRO EXATA DO PRINT
+        echo $bold . $vermelho . "[!] O FreeFire está desinstalado, cancelando a telagem...\n\n" . $cln;
         exit;
     }
-    echo $bold . $fverde . "[i] Jogo encontrado no dispositivo.\n\n";
     // --------------------------------------
+
+    echo $bold . $fverde . "[i] Jogo encontrado no dispositivo.\n\n";
 
     // --- ATRASO DE INICIALIZAÇÃO ---
     usleep(700000); 
@@ -284,9 +294,6 @@ function simularScan($nomeJogo) {
     
     error_reporting(0);
 
-    // --- CORREÇÃO: Usando a variável dinâmica $pacote, não fixo ---
-    // ANTES VC TINHA: $pacoteFixo = "com.dts.freefireth"; (ISSO ESTAVA ERRADO)
-    
     // --- ETAPA 1: VERIFICAÇÃO INICIAL ---
     $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacote . '/files/MReplays" | grep "\.bin$" | head -n 1';
     $arquivoBinMaisRecente = shell_exec($comandoFindBin);
