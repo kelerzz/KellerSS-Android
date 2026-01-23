@@ -45,7 +45,7 @@ function processando($tempo = 1) {
     usleep($tempo * 1000000); 
 }
 
-// --- Lógica REAL do ADB (CORRIGIDA) ---
+// --- Lógica REAL do ADB ---
 function conectarADBReal() {
     global $bold, $azul, $cln, $amarelo, $fverde, $vermelho, $branco;
     
@@ -54,22 +54,19 @@ function conectarADBReal() {
     
     echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
-    // Verifica se o ADB existe. Se NÃO existir, instala e avisa.
-    // Se existir, não fala nada (conforme seu pedido).
-    if (!shell_exec("command -v adb")) {
-        echo $bold . $amarelo . "[!] ADB não encontrado. Instalando android-tools...\n" . $cln;
+    if (!shell_exec("adb version > /dev/null 2>&1")) {
+        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
-        echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n" . $cln;
-    } 
-    
-    echo "\n"; // Espaço estético
+    } else {
+        echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
+    }
 
-    // --- PAREAMENTO (SEM 'ENTER P/ PULAR') ---
-    inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
+    // --- PAREAMENTO ---
+    inputusuario("Qual a sua porta para o pareamento (ex: 45678)? [Enter p/ pular]");
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
-        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento que aparece no seu celular e pressione Enter.\n" . $cln;
+        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
         system("adb pair localhost:" . $pair_port);
     } elseif (!empty($pair_port)) {
         echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
@@ -84,12 +81,15 @@ function conectarADBReal() {
         echo $bold . $amarelo . "\n[!] Conectando ao dispositivo...\n" . $cln;
         system("adb connect localhost:" . $connect_port);
         
-        echo $bold . $fverde . "\n[i] Processo de conexão finalizado. Verifique a saída acima para ver se a conexão foi bem-sucedida.\n" . $cln;
+        echo $bold . $azul . "\n[+] Verificando lista de dispositivos conectados:\n" . $cln;
+        system("adb devices"); 
+        
+        echo $bold . $fverde . "\n[i] Processo de conexão finalizado.\n" . $cln;
     } else {
         echo $bold . $vermelho . "\n[!] Porta inválida!\n" . $cln;
     }
     
-    echo "\n" . $bold . $branco . "[+] Pressione Enter para voltar ao menu...\n" . $cln;
+    echo $bold . $branco . "\n[+] Pressione Enter para voltar ao menu...\n" . $cln;
     fgets(STDIN, 1024);
 }
 
@@ -97,7 +97,7 @@ function conectarADBReal() {
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
 
-    // Define o pacote
+    // Define o pacote com base no jogo escolhido (ESSENCIAL PARA O CÓDIGO NOVO)
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
 
     system("clear");
@@ -142,10 +142,13 @@ function simularScan($nomeJogo) {
     foreach ($checks as $index => $check) {
         echo $bold . $azul . "[+] $check\n";
         
+        // Fase Lenta
         if ($index <= 5) {
             usleep(500000); 
             if ($index == 5) usleep(500000);
-        } else {
+        } 
+        // Fase Rápida
+        else {
             usleep(100000); 
         }
     }
@@ -157,7 +160,7 @@ function simularScan($nomeJogo) {
     usleep(100000); 
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // --- LOGCAT REAL (DATA SISTEMA) ---
+    // --- IMPLEMENTAÇÃO LOGCAT REAL (DATA SISTEMA) ---
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
@@ -285,7 +288,7 @@ function simularScan($nomeJogo) {
 
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
-    // --- TIMER 6 SEGUNDOS (AJUSTÁVEL) ---
+    // --- TIMER 6 SEGUNDOS ---
     sleep(6);
 
     // --- ETAPA 2: PASTA SHADERS ---
