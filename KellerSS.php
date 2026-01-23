@@ -443,7 +443,11 @@ function simularScan($nomeJogo) {
 while (true) {
     system("clear");
     keller_banner();
-    sleep(1); 
+    
+    // --- ATRASO ADICIONADO AQUI ---
+    sleep(5); 
+    // -----------------------------
+    
     echo "\n";
 
     echo $bold . $azul . "
