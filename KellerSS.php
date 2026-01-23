@@ -53,6 +53,9 @@ function conectarADBReal() {
     system("clear");
     keller_banner();
     
+    // CORREÇÃO: Força a cor branca aqui para que o output do 'pkg install' não fique verde por causa do banner
+    echo $branco; 
+    
     // Instalação do Tools (Gera o output 'Upgrading/Installing' do topo da imagem)
     if (!shell_exec("adb version > /dev/null 2>&1")) {
         system("pkg install android-tools -y"); 
