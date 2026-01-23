@@ -298,7 +298,7 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays.\n\n";
 
     // 5. HOLOGRAMA
-    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma ($nomeExibicao)...\n";
+    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
     
     error_reporting(0);
 
@@ -488,6 +488,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
