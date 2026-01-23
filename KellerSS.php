@@ -54,7 +54,7 @@ function conectarADBReal() {
     echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
     if (!shell_exec("adb version > /dev/null 2>&1")) {
-        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
+        echo $bold . $amarelo . "[!] ADB não encontrado. Instalando android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
         echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
     } else {
@@ -488,5 +488,6 @@ while (true) {
     }
 }
 ?>
+
 
 
