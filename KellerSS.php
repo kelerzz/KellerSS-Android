@@ -45,7 +45,7 @@ function processando($tempo = 1) {
     usleep($tempo * 1000000); 
 }
 
-// --- Lógica REAL do ADB (Visual Ajustado) ---
+// --- Lógica REAL do ADB (CORRIGIDA) ---
 function conectarADBReal() {
     global $bold, $azul, $cln, $amarelo, $fverde, $vermelho, $branco;
     
@@ -54,14 +54,15 @@ function conectarADBReal() {
     
     echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
-    // Verifica se o ADB existe
+    // Verifica se o ADB existe. Se NÃO existir, instala e avisa.
+    // Se existir, não fala nada (conforme seu pedido).
     if (!shell_exec("command -v adb")) {
         echo $bold . $amarelo . "[!] ADB não encontrado. Instalando android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
-        echo "\n" . $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
-    } else {
-        echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
-    }
+        echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n" . $cln;
+    } 
+    
+    echo "\n"; // Espaço estético
 
     // --- PAREAMENTO (SEM 'ENTER P/ PULAR') ---
     inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
@@ -103,7 +104,7 @@ function simularScan($nomeJogo) {
     keller_banner();
 
     // --- ATRASO DE INICIALIZAÇÃO ---
-    usleep(700000); // 0.7s
+    usleep(700000); 
 
     // 1. Início
     echo $bold . $azul . "[+] Versão do Android: 13\n";
@@ -142,10 +143,10 @@ function simularScan($nomeJogo) {
         echo $bold . $azul . "[+] $check\n";
         
         if ($index <= 5) {
-            usleep(500000); // 500ms
-            if ($index == 5) usleep(500000); // +500ms
+            usleep(500000); 
+            if ($index == 5) usleep(500000);
         } else {
-            usleep(100000); // 100ms
+            usleep(100000); 
         }
     }
     echo $bold . $fverde . "[i] Nenhum bypass de funções shell detectado.\n\n";
@@ -284,7 +285,7 @@ function simularScan($nomeJogo) {
 
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
-    // --- TIMER 6 SEGUNDOS (AJUSTÁVEL SE QUISER OS 4 MIN) ---
+    // --- TIMER 6 SEGUNDOS (AJUSTÁVEL) ---
     sleep(6);
 
     // --- ETAPA 2: PASTA SHADERS ---
@@ -406,8 +407,8 @@ function simularScan($nomeJogo) {
 
     echo $bold . $branco . "\n[+] Após verificar in-game se o usuário está de Wallhack, olhando skins de armas e atrás da parede, verifique os horários do Shaders e OBB e compare também com o horário do replay, caso esteja muito diferente as datas, aplique o W.O!\n\n";
 
-    echo $bold . $branco . "\n\n\t Obrigado por compactuar por um cenário limpo de cheats.\n";
-    echo $bold . $branco . "\t                  Com carinho, Keller...\n\n\n\n\n\n\n\n";
+    echo $bold . $branco . "\n\n\t\tObrigado por compactuar por um cenário limpo de cheats.\n";
+    echo $bold . $branco . "\t\t\t\tCom carinho, Keller...\n\n\n\n";
     
     // Finaliza automaticamente sem limpar a tela
     exit(0);
