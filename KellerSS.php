@@ -295,7 +295,7 @@ function simularScan($nomeJogo) {
 
     echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
     echo $bold . $amarelo . "[+] Data de instalação do jogo: $dateInstall\n";
-    echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays.\n\n";
+    echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
 
     // 5. HOLOGRAMA
     echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
@@ -488,6 +488,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
