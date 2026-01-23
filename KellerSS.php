@@ -97,26 +97,30 @@ function conectarADBReal() {
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
 
-    // Define o pacote com base no jogo escolhido
-    $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
+    // Configuração Dinâmica baseada no jogo escolhido
+    if ($nomeJogo == "FreeFire Max") {
+        $pacote = "com.dts.freefiremax";
+        $nomeExibicao = "FreeFire MAX"; // Exatamente como no print
+    } else {
+        $pacote = "com.dts.freefireth";
+        $nomeExibicao = "FreeFire";
+    }
 
     system("clear");
-    keller_banner(); // Mostra o banner vermelho igual ao print
+    keller_banner(); 
 
-    // --- VERIFICAÇÃO IDÊNTICA AO PRINT ---
-    // Tenta pegar o path do jogo. O "2>&1" redireciona erros do ADB para a saída
+    // --- VERIFICAÇÃO COM A LÓGICA DO PRINT ---
     $checkInstall = shell_exec("adb shell pm path $pacote 2>&1");
     
-    // Se a saída estiver vazia (não achou o jogo) OU contiver "no devices/emulators"
     if (empty(trim($checkInstall)) || strpos($checkInstall, 'package:') === false) {
         
-        // Simula a mensagem verde do ADB se for erro de conexão (igual ao seu print)
+        // Simula a mensagem verde do ADB se for erro de conexão
         if (strpos($checkInstall, 'no devices') !== false || empty(trim(shell_exec("adb devices | grep device")))) {
             echo "\e[32madb: no devices/emulators found\e[0m\n"; 
         }
 
-        // MENSAGEM DE ERRO EXATA DO PRINT
-        echo $bold . $vermelho . "[!] O FreeFire está desinstalado, cancelando a telagem...\n\n" . $cln;
+        // MENSAGEM DE ERRO DINÂMICA (Muda o nome do jogo aqui)
+        echo $bold . $vermelho . "[!] O $nomeExibicao está desinstalado, cancelando a telagem...\n\n" . $cln;
         exit;
     }
     // --------------------------------------
@@ -126,7 +130,7 @@ function simularScan($nomeJogo) {
     // --- ATRASO DE INICIALIZAÇÃO ---
     usleep(700000); 
 
-    // 1. Início
+    // 1. Início (Mantendo o Android 13 fixo mentiroso)
     echo $bold . $azul . "[+] Versão do Android: 13\n";
     usleep(100000); 
     
@@ -180,7 +184,7 @@ function simularScan($nomeJogo) {
     usleep(100000); 
     echo $bold . $fverde . "[i] Dispositivo não reiniciado recentemente.\n\n";
 
-    // --- IMPLEMENTAÇÃO LOGCAT REAL (DATA SISTEMA) ---
+    // --- IMPLEMENTAÇÃO LOGCAT REAL ---
     $logcatTime = shell_exec("adb logcat -d -v time | head -n 2");
     preg_match('/(\d{2}-\d{2} \d{2}:\d{2}:\d{2})/', $logcatTime, $matchTime);
 
@@ -287,7 +291,7 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays.\n\n";
 
     // 5. HOLOGRAMA
-    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma ($nomeJogo)...\n";
+    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma ($nomeExibicao)...\n";
     
     error_reporting(0);
 
@@ -396,7 +400,6 @@ function simularScan($nomeJogo) {
     // --- CHECAGEM OBB ---
     echo $bold . $azul . "[+] Checando OBB...\n";
 
-    // CORREÇÃO: Agora verifica o OBB do pacote escolhido, não só do Normal
     $diretorioObb = "/sdcard/Android/obb/$pacote";
     $comandoObb = 'adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"';
     $resultadoObb = shell_exec($comandoObb);
