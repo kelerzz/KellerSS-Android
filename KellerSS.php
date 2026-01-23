@@ -320,7 +320,7 @@ function simularScan($nomeJogo) {
     echo $bold . $verde . "[+] Nenhum bypass de holograma detectado.\n\n";
 
     // --- TIMER 6 SEGUNDOS ---
-    sleep(6);
+    sleep(240);
 
     // --- ETAPA 2: PASTA SHADERS ---
     $pastaShaders = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles";
@@ -491,6 +491,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
