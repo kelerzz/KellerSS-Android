@@ -55,13 +55,9 @@ function conectarADBReal() {
     echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
     
     if (!shell_exec("adb version > /dev/null 2>&1")) {
-        echo $bold . $amarelo . "[!] ADB não encontrado. instalar android-tools...\n" . $cln;
+        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
         system("pkg install android-tools -y"); 
-        
-        // --- MODIFICAÇÃO SOLICITADA ---
         echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
-        // -----------------------------
-        
     } else {
         echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
     }
@@ -102,11 +98,23 @@ function conectarADBReal() {
 function simularScan($nomeJogo) {
     global $bold, $azul, $fverde, $verde, $amarelo, $branco, $cln, $vermelho, $laranja;
 
-    // Define o pacote com base no jogo escolhido (ESSENCIAL PARA O CÓDIGO NOVO)
+    // Define o pacote com base no jogo escolhido
     $pacote = ($nomeJogo == "FreeFire Max") ? "com.dts.freefiremax" : "com.dts.freefireth";
 
     system("clear");
     keller_banner();
+
+    // --- NOVA VERIFICAÇÃO DE INSTALAÇÃO ---
+    echo $bold . $azul . "[+] Verificando se o $nomeJogo está instalado...\n";
+    // Usamos 'pm path' para ver se o pacote existe no sistema
+    $checkInstall = shell_exec("adb shell pm path $pacote");
+    
+    if (empty(trim($checkInstall)) || strpos($checkInstall, 'package:') === false) {
+        echo $bold . $vermelho . "[!] O FreeFire está desinstalado, cancelando a telagem...\n\n";
+        exit;
+    }
+    echo $bold . $fverde . "[i] Jogo encontrado no dispositivo.\n\n";
+    // --------------------------------------
 
     // --- ATRASO DE INICIALIZAÇÃO ---
     usleep(700000); 
@@ -268,24 +276,24 @@ function simularScan($nomeJogo) {
     }
 
     echo $bold . $amarelo . "[+] Data de acesso da pasta MReplays: $dateReplay\n";
-    echo $bold . $amarelo . "[+] Data de instalação do Free Fire: $dateInstall\n";
-    echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
+    echo $bold . $amarelo . "[+] Data de instalação do jogo: $dateInstall\n";
+    echo $bold . $branco . "[#] Verifique a data de instalação do jogo com a data de acesso da pasta MReplays.\n\n";
 
     // 5. HOLOGRAMA
-    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma...\n";
+    echo $bold . $azul . "[+] Checando bypass de Wallhack/Holograma ($nomeJogo)...\n";
     
     error_reporting(0);
 
-    // Variáveis de Caminho Fixo
-    $pacoteFixo = "com.dts.freefireth";
-
+    // --- CORREÇÃO: Usando a variável dinâmica $pacote, não fixo ---
+    // ANTES VC TINHA: $pacoteFixo = "com.dts.freefireth"; (ISSO ESTAVA ERRADO)
+    
     // --- ETAPA 1: VERIFICAÇÃO INICIAL ---
-    $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacoteFixo . '/files/MReplays" | grep "\.bin$" | head -n 1';
+    $comandoFindBin = 'adb shell ls -t "/sdcard/Android/data/' . $pacote . '/files/MReplays" | grep "\.bin$" | head -n 1';
     $arquivoBinMaisRecente = shell_exec($comandoFindBin);
     
     $pastasCache = [
-        "/sdcard/Android/data/$pacoteFixo/files/contentcache",
-        "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android"
+        "/sdcard/Android/data/$pacote/files/contentcache",
+        "/sdcard/Android/data/$pacote/files/contentcache/Optional/android"
     ];
     foreach ($pastasCache as $p) {
         shell_exec('adb shell stat ' . escapeshellarg($p) . ' 2>&1');
@@ -297,7 +305,7 @@ function simularScan($nomeJogo) {
     sleep(6);
 
     // --- ETAPA 2: PASTA SHADERS ---
-    $pastaShaders = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/gameassetbundles";
+    $pastaShaders = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/gameassetbundles";
     
     $resultadoPastaShaders = shell_exec('adb shell "stat ' . escapeshellarg($pastaShaders) . ' 2>/dev/null"');
     $dataModifyFormatada = "Não encontrada";
@@ -319,7 +327,7 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[#] Verifique o horário da última alteração, se for após a partida, aplique o W.O!\n\n";
 
     // --- ETAPA 3: PASTA ANDROID ---
-    $diretorioAndroid = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android"; 
+    $diretorioAndroid = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android"; 
     echo $bold . $branco . "[+] Verificando datas de modificação na pasta 'android'...\n";
 
     $statAndroid = shell_exec('adb shell stat ' . escapeshellarg($diretorioAndroid) . ' 2>&1');
@@ -337,8 +345,8 @@ function simularScan($nomeJogo) {
     echo $bold . $branco . "[+] Caso a pasta 'android' esteja modificada após o fim da partida, aplique o W.O!\n\n";
 
     // --- ETAPA 4: AVATAR RES e UNITYFS ---
-    $diretorioAvatarRes = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
-    $diretorioOptional = "/sdcard/Android/data/$pacoteFixo/files/contentcache/Optional/android/optionalavatarres";
+    $diretorioAvatarRes = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres/gameassetbundles";
+    $diretorioOptional = "/sdcard/Android/data/$pacote/files/contentcache/Optional/android/optionalavatarres";
 
     $checkDir = shell_exec('adb shell "if [ -d ' . escapeshellarg($diretorioAvatarRes) . ' ]; then echo existe; else echo naoexiste; fi"');
     $diretorioAlvo = (trim((string)$checkDir) === "existe") ? $diretorioAvatarRes : $diretorioOptional;
@@ -384,7 +392,8 @@ function simularScan($nomeJogo) {
     // --- CHECAGEM OBB ---
     echo $bold . $azul . "[+] Checando OBB...\n";
 
-    $diretorioObb = "/sdcard/Android/obb/com.dts.freefireth";
+    // CORREÇÃO: Agora verifica o OBB do pacote escolhido, não só do Normal
+    $diretorioObb = "/sdcard/Android/obb/$pacote";
     $comandoObb = 'adb shell "ls ' . escapeshellarg($diretorioObb) . '/*obb* 2>/dev/null"';
     $resultadoObb = shell_exec($comandoObb);
 
@@ -462,4 +471,3 @@ while (true) {
     }
 }
 ?>
-
