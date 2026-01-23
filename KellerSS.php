@@ -205,7 +205,7 @@ function simularScan($nomeJogo) {
         echo $bold . $branco . "[+] W.O aplicável se a falha persistir sem justificativa.\n\n";
     }
 
-    // --- VERIFICANDO MUDANÇAS ---
+// --- VERIFICANDO MUDANÇAS ---
     echo $bold . $azul . "[+] Verificando mudanças de data/hora...\n";
 
     $logcatOutput = shell_exec('adb logcat -d | grep "UsageStatsService: Time changed" | grep -v "HCALL"');
@@ -213,6 +213,9 @@ function simularScan($nomeJogo) {
 
     if ($logcatOutput !== null && trim($logcatOutput) !== "") {
         $logLines = explode("\n", trim($logcatOutput));
+    } else {
+        // [ADICIONADO] Exibe a mensagem de erro se o logcat vier vazio
+        echo $bold . $vermelho . "[!] Erro ao obter logs de modificação de data/hora, verifique a data da primeira log do sistema.\n";
     }
 
     $fusoHorario = trim(shell_exec('adb shell getprop persist.sys.timezone'));
@@ -488,6 +491,7 @@ while (true) {
     }
 }
 ?>
+
 
 
 
