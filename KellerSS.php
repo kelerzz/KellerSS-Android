@@ -19,18 +19,18 @@ function keller_banner(){
   echo "\e[37m
            KellerSS Android\e[36m Fucking Cheaters\e[91m\e[37m discord.gg/allianceoficial\e[91m
             
-                            )       (     (          (     
-                        ( /(       )\ )  )\ )       )\ )  
-                        )\()) (   (()/( (()/(  (   (()/(  
+                            )       (     (           (      
+                        ( /(       )\ )  )\ )       )\ )   
+                        )\()) (   (()/( (()/(  (   (()/(   
                         |((_)\  )\   /(_)) /(_)) )\   /(_)) 
                         |_ ((_)((_) (_))  (_))  ((_) (_))   
                         | |/ / | __|| |   | |   | __|| _ \  
-                        ' <  | _| | |__ | |__ | _| |   /  
-                        _|\_\ |___||____||____||___||_|_\  
+                        ' <  | _| | |__ | |__ | _| |   /   
+                        _|\_\ |___||____||____||___||_|_\   
 
 
 
-                    \e[36m{C} Coded By - KellerSS | Credits for Sheik                                   
+                    \e[36m{C} Coded By - KellerSS | Credits for Sheik                                    
 \e[32m
   \n";
 }
@@ -44,53 +44,62 @@ function processando($tempo = 1) {
     usleep($tempo * 1000000); 
 }
 
-// --- Lógica REAL do ADB ---
+// --- Lógica REAL do ADB (MODIFICADA) ---
 function conectarADBReal() {
     global $bold, $azul, $cln, $amarelo, $fverde, $vermelho, $branco;
     
     system("clear");
     keller_banner();
     
-    echo $bold . $azul . "[+] Verificando se o ADB está instalado...\n" . $cln;
+    // Verificação silenciosa ou mínima se necessário, 
+    // mas para ficar igual a imagem, vamos direto aos inputs.
     
+    echo $bold . $azul . "[+] Verificando ADB...\n" . $cln;
     if (!shell_exec("adb version > /dev/null 2>&1")) {
-        echo $bold . $amarelo . "[!] ADB não encontrado. Tentando instalar android-tools...\n" . $cln;
+        echo $bold . $amarelo . "[!] ADB não encontrado. Instalando...\n" . $cln;
         system("pkg install android-tools -y"); 
-        echo $bold . $fverde . "[i] Android-tools instalado com sucesso!\n\n" . $cln;
-    } else {
-        echo $bold . $fverde . "[i] ADB já está instalado.\n\n" . $cln;
     }
 
-    // --- PAREAMENTO ---
+    // --- PAREAMENTO (Mantido conforme lógica original, mas limpo) ---
     inputusuario("Qual a sua porta para o pareamento (ex: 45678)?");
     $pair_port = trim(fgets(STDIN, 1024));
 
     if (!empty($pair_port) && is_numeric($pair_port)) {
-        echo $bold . $amarelo . "\n[!] Agora, digite o código de pareamento do celular e pressione Enter.\n" . $cln;
+        echo $bold . $amarelo . "\n[!] Digite o código de pareamento do Wifi Debugging:\n" . $cln;
         system("adb pair localhost:" . $pair_port);
-    } elseif (!empty($pair_port)) {
-        echo $bold . $vermelho . "\n[!] Porta inválida! Pulando pareamento.\n" . $cln;
-    }
+    } 
 
-    // --- CONEXÃO ---
+    // --- CONEXÃO (AQUI ESTÁ A ALTERAÇÃO PRINCIPAL) ---
     echo "\n";
     inputusuario("Qual a sua porta para a conexão (ex: 12345)?");
     $connect_port = trim(fgets(STDIN, 1024));
     
+    system("clear"); // Limpa a tela para mostrar apenas o resultado final como na imagem
+    
     if (!empty($connect_port) && is_numeric($connect_port)) {
-        echo $bold . $amarelo . "\n[!] Conectando ao dispositivo...\n" . $cln;
+        // 1. Mensagem Amarela
+        echo "\n" . $bold . $amarelo . "[!] Conectando ao dispositivo...\n" . $cln;
+        
+        // 2. Comando do sistema (vai gerar o output "connected to localhost:xxxxx")
+        // O output padrão do ADB é branco/cinza, igual à imagem
         system("adb connect localhost:" . $connect_port);
         
-        echo $bold . $azul . "\n[+] Verificando lista de dispositivos conectados:\n" . $cln;
-        system("adb devices"); 
+        // 3. Espaço e Mensagem Verde exata
+        echo "\n";
+        echo $bold . $fverde . "[i] Processo de conexão finalizado. Verifique a saída\nacima para ver se a conexão foi bem-sucedida.\n" . $cln;
         
-        echo $bold . $fverde . "\n[i] Processo de conexão finalizado.\n" . $cln;
+        // 4. Espaço e Mensagem Branca de Enter
+        echo "\n";
+        echo $bold . $branco . "[+] Pressione Enter para voltar ao menu...\n" . $cln;
+        
+        // Input invisível apenas para pausar
+        fgets(STDIN, 1024);
+        
     } else {
+        // Caso digite porta errada, mantém o erro original mas volta pro menu
         echo $bold . $vermelho . "\n[!] Porta inválida!\n" . $cln;
+        sleep(2);
     }
-    
-    echo $bold . $branco . "\n[+] Pressione Enter para voltar ao menu...\n" . $cln;
-    fgets(STDIN, 1024);
 }
 
 // --- Lógica do Scanner ---
@@ -452,7 +461,7 @@ while (true) {
 
     echo $bold . $azul . "
       +--------------------------------------------------------------+
-      +                       KellerSS Menu                          +
+      +                        KellerSS Menu                         +
       +--------------------------------------------------------------+
       
       \n\n";
