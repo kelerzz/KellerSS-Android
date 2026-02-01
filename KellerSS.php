@@ -61,7 +61,6 @@ function detectarBypassShell() {
     echo $bold . $azul . "│ [1] VERIFICANDO DISPOSITIVO CONECTADO                           │\n";
     echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
     
-    // Comandos executados em background para simular o processo
     $devices = shell_exec('adb devices 2>&1');
     $check = shell_exec('adb shell "ls /sdcard 2>&1"');
     
@@ -95,6 +94,8 @@ function detectarBypassShell() {
         $totalVerificacoes++;
     }
     
+    // DELAY DE 100ms AQUI
+    usleep(100000);
     echo $bold . $verde . "  ✓ Verificação de propriedades concluída\n" . $cln;
 
     echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
@@ -108,6 +109,8 @@ function detectarBypassShell() {
         $totalVerificacoes++;
     }
     
+    // DELAY DE 200ms AQUI
+    usleep(200000);
     echo $bold . $verde . "  ✓ Nenhum binário SU encontrado\n" . $cln;
 
     echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
@@ -141,6 +144,8 @@ function detectarBypassShell() {
     shell_exec('adb shell "logcat -d -b kernel 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"');
     $totalVerificacoes++;
     
+    // DELAY DE 7 SEGUNDOS AQUI
+    sleep(7);
     echo $bold . $verde . "  ✓ Logs do sistema limpos\n" . $cln;
 
     echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
@@ -1067,6 +1072,7 @@ escolheropcoes:
       }
 
 ?>
+
 
 
 
