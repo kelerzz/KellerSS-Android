@@ -46,23 +46,6 @@ function keller_banner(){
 
 echo $cln;
 
-function atualizar()
-{
-    global $cln, $bold, $fverde, $vermelho, $azul;
-    echo "\n" . $bold . $azul . "┌─ KELLERSS UPDATER\n" . $cln;
-    echo $vermelho . "  ⟳ Atualizando, aguarde...\n\n" . $cln;
-    system("git fetch origin && git reset --hard origin/master && git clean -f -d");
-    echo $bold . $fverde . "  ✓ Atualização concluída! Reinicie o scanner\n" . $cln;
-    exit;
-}
-
-function detectarBypassShell() {
-    global $bold, $vermelho, $amarelo, $fverde, $azul, $branco, $cln, $verde, $ciano;
-    
-    $bypassDetectado = false;
-    $totalVerificacoes = 0;
-    $problemasEncontrados = 0;
-    
 function detectarBypassShell() {
     global $bold, $vermelho, $amarelo, $fverde, $azul, $branco, $cln, $verde, $ciano;
     
@@ -1084,5 +1067,6 @@ escolheropcoes:
       }
 
 ?>
+
 
 
