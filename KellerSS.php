@@ -95,7 +95,7 @@ function detectarBypassShell() {
     }
     
     // DELAY DE 100ms AQUI
-    usleep(100000);
+    usleep(400000);
     echo $bold . $verde . "  ✓ Verificação de propriedades concluída\n" . $cln;
 
     echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
@@ -110,7 +110,7 @@ function detectarBypassShell() {
     }
     
     // DELAY DE 200ms AQUI
-    usleep(200000);
+    usleep(600000);
     echo $bold . $verde . "  ✓ Nenhum binário SU encontrado\n" . $cln;
 
     echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
@@ -1072,6 +1072,7 @@ escolheropcoes:
       }
 
 ?>
+
 
 
 
