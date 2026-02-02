@@ -435,6 +435,94 @@ function escanearFreeFire($pacote, $nomeJogo) {
     echo $bold . $amarelo . "  • Data de instalação do jogo: $dateInstall\n";
     echo $bold . $branco . "  ▸ Verifique a data de instalação do jogo com a data de acesso da pasta MReplays para ver se o jogo foi recém instalado antes da partida, se não, vá no histórico e veja se o player jogou outras partidas recentemente, se sim, aplique o W.O!\n\n";
     
+    echo $bold . $azul . "  → Checando bypass de Wallhack/Holograma...\n";
+
+    $pastasParaVerificar = [
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android/gameassetbundles",
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android",
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional",
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache",
+        "/sdcard/Android/data/" . $pacote . "/files",
+        "/sdcard/Android/data/" . $pacote,
+        "/sdcard/Android/data",
+        "/sdcard/Android"
+    ];
+
+    $pastasParaVerificar2 = [
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android/gameassetbundles",
+        "/sdcard/Android/data/" . $pacote . "/files/contentcache/Optional/android",
+    ];
+
+    $modificacaoDetectada = false;
+
+    foreach ($pastasParaVerificar as $pasta) {
+        $resultadoStat = shell_exec('adb shell "stat ' . escapeshellarg($pasta) . ' 2>/dev/null"');
+
+        if (
+            preg_match('/Access: (.*?)\n/', $resultadoStat, $matchAccess) &&
+            preg_match('/Modify: (.*?)\n/', $resultadoStat, $matchModify) &&
+            preg_match('/Change: (.*?)\n/', $resultadoStat, $matchChange)
+        ) {
+            $dataAccess = trim(preg_replace('/ -\d{4}$/', '', $matchAccess[1]));
+            $dataModify = trim(preg_replace('/ -\d{4}$/', '', $matchModify[1]));
+            $dataChange = trim(preg_replace('/ -\d{4}$/', '', $matchChange[1]));
+
+            if ($dataModify !== $dataChange) {
+                echo $bold . $vermelho . "  ✗ Modificação detectada na pasta: $pasta! Aplique o W.O!\n\n";
+                $modificacaoDetectada = true;
+            }
+        }
+    }
+
+    if (!$modificacaoDetectada) {
+        echo $bold . $fverde . "  ℹ Nenhuma modificação suspeita encontrada nas pastas principais.\n\n";
+    }
+
+    echo $bold . $azul . "  → Verificando arquivos específicos...\n";
+
+    foreach ($pastasParaVerificar2 as $pasta) {
+        $comandoListar = 'adb shell "ls ' . escapeshellarg($pasta) . ' 2>/dev/null"';
+        $listaArquivos = shell_exec($comandoListar);
+
+        if ($listaArquivos) {
+            $arquivos = explode("\n", trim($listaArquivos));
+            foreach ($arquivos as $arquivo) {
+                if (empty($arquivo)) continue;
+
+                $caminhoArquivo = $pasta . "/" . $arquivo;
+                $nomeArquivo = basename($caminhoArquivo);
+
+                if (strpos($nomeArquivo, 'avatar') !== false || strpos($nomeArquivo, 'config') !== false) {
+                    try {
+                        $resultadoDataModifyArquivo = shell_exec('adb shell stat -c "%y" ' . escapeshellarg($caminhoArquivo));
+                        $resultadoDataChangeArquivo = shell_exec('adb shell stat -c "%z" ' . escapeshellarg($caminhoArquivo));
+
+                        if ($resultadoDataModifyArquivo && $resultadoDataChangeArquivo) {
+                            $dataModifyArquivo = new DateTime($resultadoDataModifyArquivo, new DateTimeZone('UTC'));
+                            $dataModifyArquivo->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+
+                            $dataChangeArquivo = new DateTime($resultadoDataChangeArquivo, new DateTimeZone('UTC'));
+                            $dataChangeArquivo->setTimezone(new DateTimeZone('America/Sao_Paulo'));
+
+                            if ($dataModifyArquivo != $dataChangeArquivo) {
+                                echo $bold . $vermelho . "  ✗ Modificação detectada no arquivo: $nomeArquivo! Aplique o W.O!\n\n";
+                                $modificacaoDetectada = true;
+                            }
+                        }
+                    } catch (Exception $e) {
+                        echo $vermelho . "[!] Erro ao verificar datas do arquivo $nomeArquivo: " . $e->getMessage() . "\n";
+                    }
+                }
+            }
+
+            if (!$modificacaoDetectada) {
+                echo $bold . $fverde . "  ℹ Nenhuma alteração suspeita encontrada nos arquivos.\n\n";
+            }
+        } else {
+            echo $vermelho . "[*] Sem itens baixados! Verifique se a data é após o fim da partida!\n\n";
+        }
+    }
+  
     echo $bold . $azul . "  → Checando OBB...\n";
 
     $diretorioObb = "/sdcard/Android/obb/" . $pacote;
@@ -810,6 +898,7 @@ escolheropcoes:
       }
 
 ?>
+
 
 
 
