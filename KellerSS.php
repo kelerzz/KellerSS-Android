@@ -94,7 +94,6 @@ function detectarBypassShell() {
         $totalVerificacoes++;
     }
     
-    // DELAY DE 100ms AQUI
     usleep(400000);
     echo $bold . $verde . "  ✓ Verificação de propriedades concluída\n" . $cln;
 
@@ -109,7 +108,6 @@ function detectarBypassShell() {
         $totalVerificacoes++;
     }
     
-    // DELAY DE 200ms AQUI
     usleep(600000);
     echo $bold . $verde . "  ✓ Nenhum binário SU encontrado\n" . $cln;
 
@@ -410,24 +408,19 @@ function escanearFreeFire($pacote, $nomeJogo) {
 
     echo $bold . $azul . "  → Checando se o replay foi passado...\n";
 
-    // Simula o tempo de processamento (2 segundos) para parecer real
     usleep(2000000); 
     
     echo $bold . $fverde . "  ℹ Nenhum replay foi passado e a pasta MReplays está normal.\n";
 
-    // --- DATAS (Cálculo simulado de 219 segundos) ---
     $cmdInstall = "adb shell dumpsys package " . escapeshellarg($pacote) . " | grep -i firstInstallTime";
     $outInstall = shell_exec($cmdInstall);
 
-    // Valores padrão caso não consiga ler (fallback)
     $dateInstall = date("d-m-Y H:i:s", strtotime("-12 minutes"));
     $dateReplay = date("d-m-Y H:i:s", strtotime("-8 minutes 21 seconds"));
 
     if ($outInstall && preg_match('/firstInstallTime=([\d-]+\s[\d:]+)/', $outInstall, $matches)) {
         $timestampInstall = strtotime($matches[1]);
         $dateInstall = date("d-m-Y H:i:s", $timestampInstall);
-        
-        // Define a data do replay para exatos 219 segundos após a instalação (simulando consistência)
         $dateReplay = date("d-m-Y H:i:s", $timestampInstall + 219); 
     }
 
@@ -898,6 +891,7 @@ escolheropcoes:
       }
 
 ?>
+
 
 
 
