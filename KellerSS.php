@@ -23,23 +23,19 @@ $ciano = "\e[36m";
 $bold   = "\e[1m";
 function keller_banner(){
   echo "\e[97m
-    ╔══════════════════════════════════════════════════════════════╗
-    ║                                                              ║
-    ║            \e[97mKellerSS Android \e[36mFucking Cheaters\e[97m                ║
-    ║                \e[90mdiscord.gg/allianceoficial\e[97m                    ║
-    ║                                                              ║
-    ╚══════════════════════════════════════════════════════════════╝
+  \e[97mKellerSS Android \e[36mFucking Cheaters\e[97m
+  \e[90mdiscord.gg/allianceoficial\e[97m
 
-                            )       (     (          (     
-                        ( /(       )\ )  )\ )       )\ )  
-                        )\()) (   (()/( (()/(  (   (()/(  
-                        |((_)\  )\   /(_)) /(_)) )\   /(_)) 
-                        |_ ((_)((_) (_))  (_))  ((_) (_))   
-                        | |/ / | __|| |   | |   | __|| _ \  
-                        ' <  | _| | |__ | |__ | _| |   /  
-                        _|\_\ |___||____||____||___||_|_\  
+  )       (     (          (     
+  ( /(       )\ )  )\ )       )\ )  
+  )\()) (   (()/( (()/(  (   (()/(  
+  |((_)\  )\   /(_)) /(_)) )\   /(_)) 
+  |_ ((_)((_) (_))  (_))  ((_) (_))   
+  | |/ / | __|| |   | |   | __|| _ \  
+  ' <  | _| | |__ | |__ | _| |   /  
+  _|\_\ |___||____||____||___||_|_\  
 
-                \e[36mCoded By: KellerSS | Credits: Sheik\e[0m
+  \e[36mCoded By: KellerSS | Credits: Sheik\e[0m
   \n";
 }
 
@@ -53,40 +49,34 @@ function detectarBypassShell() {
     $totalVerificacoes = 0;
     
     echo "\n";
-    echo $bold . $ciano . "╔═══════════════════════════════════════════════════════════════════╗\n";
-    echo $bold . $ciano . "║          ANÁLISE COMPLETA DE SEGURANÇA DO DISPOSITIVO             ║\n";
-    echo $bold . $ciano . "╚═══════════════════════════════════════════════════════════════════╝\n\n" . $cln;
+    echo $bold . $ciano . "  ANÁLISE COMPLETA DE SEGURANÇA DO DISPOSITIVO\n";
+    echo $bold . $ciano . "  ============================================\n\n" . $cln;
 
-    echo $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [1] VERIFICANDO DISPOSITIVO CONECTADO                           │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo $bold . $azul . "  ► [1] VERIFICANDO DISPOSITIVO CONECTADO\n";
+    echo $bold . $azul . "  ---------------------------------------\n" . $cln;
     
     $devices = shell_exec('adb devices 2>&1');
     $check = shell_exec('adb shell "ls /sdcard 2>&1"');
     
     echo $bold . $verde . "  ✓ Dispositivo conectado com permissões adequadas\n\n" . $cln;
 
-    echo $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [2] VERIFICANDO ESTADO DE BOOT VERIFICADO                       │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo $bold . $azul . "  ► [2] VERIFICANDO ESTADO DE BOOT VERIFICADO\n";
+    echo $bold . $azul . "  -------------------------------------------\n" . $cln;
     
     $verifiedBootState = trim(shell_exec('adb shell getprop ro.boot.verifiedbootstate 2>/dev/null'));
     
     echo $bold . $verde . "  ✓ Boot State: GREEN - Sistema verificado\n" . $cln;
     $totalVerificacoes++;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [3] VERIFICANDO STATUS DO SELINUX                               │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
-    
+     echo "\n" . $bold . $azul . "  ► [3] VERIFICANDO STATUS DO SELINUX\n";
+    echo $bold . $azul . "  -----------------------------------\n" . $cln;
     $selinux = trim(shell_exec('adb shell getenforce 2>/dev/null'));
     
     echo $bold . $verde . "  ✓ SELinux: ENFORCING - Modo de segurança ativo\n" . $cln;
     $totalVerificacoes++;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [4] VERIFICANDO PROPRIEDADES DO SISTEMA                         │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [4] VERIFICANDO PROPRIEDADES DO SISTEMA\n";
+    echo $bold . $azul . "  -----------------------------------------\n" . $cln;
     
     $propriedadesSuspeitas = array('ro.debuggable', 'ro.secure', 'service.adb.root', 'ro.build.selinux');
     foreach ($propriedadesSuspeitas as $prop) {
@@ -97,9 +87,8 @@ function detectarBypassShell() {
     usleep(400000);
     echo $bold . $verde . "  ✓ Verificação de propriedades concluída\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [5] VERIFICANDO BINÁRIOS SU (SUPERUSUÁRIO)                      │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [5] VERIFICANDO BINÁRIOS SU (SUPERUSUÁRIO)\n";
+    echo $bold . $azul . "  --------------------------------------------\n" . $cln;
     
     $binariosSU = array('/system/bin/su', '/system/xbin/su', '/sbin/su');
     foreach ($binariosSU as $bin) {
@@ -111,33 +100,29 @@ function detectarBypassShell() {
     usleep(600000);
     echo $bold . $verde . "  ✓ Nenhum binário SU encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [6] DETECÇÃO AVANÇADA DE MAGISK                                 │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [6] DETECÇÃO AVANÇADA DE MAGISK\n";
+    echo $bold . $azul . "  ---------------------------------\n" . $cln;
     
     shell_exec('adb shell "pm list packages 2>/dev/null | grep -iE \'magisk|topjohnwu\'"');
     
     echo $bold . $verde . "  ✓ Nenhum vestígio de Magisk encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [7] DETECÇÃO DE KERNELSU                                        │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [7] DETECÇÃO DE KERNELSU\n";
+    echo $bold . $azul . "  --------------------------\n" . $cln;
     
     shell_exec('adb shell "lsmod 2>/dev/null | grep -i kernelsu"');
     
     echo $bold . $verde . "  ✓ Nenhum vestígio de KernelSU encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [8] DETECÇÃO DE APATCH                                          │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [8] DETECÇÃO DE APATCH\n";
+    echo $bold . $azul . "  ------------------------\n" . $cln;
     
     shell_exec('adb shell "pm list packages 2>/dev/null | grep -i apatch"');
     
     echo $bold . $verde . "  ✓ Nenhum vestígio de APatch encontrado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [9] ANÁLISE DE LOGS DO KERNEL E SISTEMA                         │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [9] ANÁLISE DE LOGS DO KERNEL E SISTEMA\n";
+    echo $bold . $azul . "  -----------------------------------------\n" . $cln;
     
     shell_exec('adb shell "logcat -d -b kernel 2>/dev/null | grep -iE \'kernelsu|magisk|apatch\'"');
     $totalVerificacoes++;
@@ -146,23 +131,20 @@ function detectarBypassShell() {
     sleep(7);
     echo $bold . $verde . "  ✓ Logs do sistema limpos\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [10] DETECÇÃO DE FRAMEWORKS DE HOOK                            │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [10] DETECÇÃO DE FRAMEWORKS DE HOOK\n";
+    echo $bold . $azul . "  -------------------------------------\n" . $cln;
     
     echo $bold . $verde . "  ✓ Nenhum framework de hook detectado\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [11] VERIFICANDO FUNÇÕES SHELL SOBRESCRITAS                     │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [11] VERIFICANDO FUNÇÕES SHELL SOBRESCRITAS\n";
+    echo $bold . $azul . "  ---------------------------------------------\n" . $cln;
     
     shell_exec('adb shell "type pkg 2>/dev/null"');
     
     echo $bold . $verde . "  ✓ Todas as funções shell estão normais\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [12] TESTANDO ACESSO A DIRETÓRIOS CRÍTICOS                      │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [12] TESTANDO ACESSO A DIRETÓRIOS CRÍTICOS\n";
+    echo $bold . $azul . "  --------------------------------------------\n" . $cln;
     
     $diretoriosCriticos = array('/system/bin', '/data/adb');
     foreach ($diretoriosCriticos as $diretorio) {
@@ -172,9 +154,8 @@ function detectarBypassShell() {
     
     echo $bold . $verde . "  ✓ Acesso aos diretórios está normal\n" . $cln;
 
-    echo "\n" . $bold . $azul . "┌─────────────────────────────────────────────────────────────────┐\n";
-    echo $bold . $azul . "│ [13] VERIFICANDO PROCESSOS SUSPEITOS                            │\n";
-    echo $bold . $azul . "└─────────────────────────────────────────────────────────────────┘\n" . $cln;
+    echo "\n" . $bold . $azul . "  ► [13] VERIFICANDO PROCESSOS SUSPEITOS\n";
+    echo $bold . $azul . "  --------------------------------------\n" . $cln;
     
     shell_exec('adb shell "ps -A"');
     
@@ -891,6 +872,7 @@ escolheropcoes:
       }
 
 ?>
+
 
 
 
